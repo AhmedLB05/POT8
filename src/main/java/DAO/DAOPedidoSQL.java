@@ -12,6 +12,8 @@ import java.util.ArrayList;
 
 public class DAOPedidoSQL implements DAOPedido {
 
+    private final DAOPedidoProductosSQL daoPedidoProductos = new DAOPedidoProductosSQL();
+
     @Override
     public ArrayList<Pedido> readAll(DAOManager dao) {
         ArrayList<Pedido> pedidos = new ArrayList<>();
