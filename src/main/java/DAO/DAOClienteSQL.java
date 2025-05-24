@@ -5,7 +5,6 @@ import models.Cliente;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 
 public class DAOClienteSQL implements DAOCliente {
@@ -35,6 +34,8 @@ public class DAOClienteSQL implements DAOCliente {
                 }
             }
             dao.close();
+
+            // Para cada cliente leemos pedidos y carrito usando DAOs
             for (Cliente c : clientes) {
                 c.setPedidos(daoPedidoSQL.readPedidosByIdCliente(dao, c));
                 c.setCarro(daoCarroSQL.readAll(dao, c));
@@ -49,17 +50,18 @@ public class DAOClienteSQL implements DAOCliente {
     public boolean insert(DAOManager dao, Cliente cliente) {
         try {
             dao.open();
-            String sentencia = "INSERT INTO `Cliente` (`id`, `email`, `clave`, `nombre`, `localidad`, `provincia`, `direccion`, `movil`) VALUES (" +
-                    cliente.getId() + ", '" +
-                    cliente.getEmail() + "', '" +
-                    cliente.getClave() + "', '" +
-                    cliente.getNombre() + "', '" +
-                    cliente.getLocalidad() + "', '" +
-                    cliente.getProvincia() + "', '" +
-                    cliente.getDireccion() + "', " +
-                    cliente.getMovil() + ")";
-            Statement stmt = dao.getConn().createStatement();
-            stmt.executeUpdate(sentencia);
+            // Para evitar errores por comillas, usar PreparedStatement mejor:
+            String sql = "INSERT INTO Cliente (id, email, clave, nombre, localidad, provincia, direccion, movil) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            PreparedStatement ps = dao.getConn().prepareStatement(sql);
+            ps.setInt(1, cliente.getId());
+            ps.setString(2, cliente.getEmail());
+            ps.setString(3, cliente.getClave());
+            ps.setString(4, cliente.getNombre());
+            ps.setString(5, cliente.getLocalidad());
+            ps.setString(6, cliente.getProvincia());
+            ps.setString(7, cliente.getDireccion());
+            ps.setInt(8, cliente.getMovil());
+            ps.executeUpdate();
             return true;
         } catch (Exception e) {
             return false;
@@ -76,17 +78,17 @@ public class DAOClienteSQL implements DAOCliente {
     public boolean update(DAOManager dao, Cliente cliente) {
         try {
             dao.open();
-            String sentencia = "UPDATE Cliente SET " +
-                    "`email` = '" + cliente.getEmail() + "', " +
-                    "`clave` = '" + cliente.getClave() + "', " +
-                    "`nombre` = '" + cliente.getNombre() + "', " +
-                    "`localidad` = '" + cliente.getLocalidad() + "', " +
-                    "`provincia` = '" + cliente.getProvincia() + "', " +
-                    "`direccion` = '" + cliente.getDireccion() + "', " +
-                    "`movil` = " + cliente.getMovil() +
-                    " WHERE `id` = " + cliente.getId();
-            Statement stmt = dao.getConn().createStatement();
-            stmt.executeUpdate(sentencia);
+            String sql = "UPDATE Cliente SET email = ?, clave = ?, nombre = ?, localidad = ?, provincia = ?, direccion = ?, movil = ? WHERE id = ?";
+            PreparedStatement ps = dao.getConn().prepareStatement(sql);
+            ps.setString(1, cliente.getEmail());
+            ps.setString(2, cliente.getClave());
+            ps.setString(3, cliente.getNombre());
+            ps.setString(4, cliente.getLocalidad());
+            ps.setString(5, cliente.getProvincia());
+            ps.setString(6, cliente.getDireccion());
+            ps.setInt(7, cliente.getMovil());
+            ps.setInt(8, cliente.getId());
+            ps.executeUpdate();
             return true;
         } catch (Exception e) {
             return false;
@@ -103,9 +105,10 @@ public class DAOClienteSQL implements DAOCliente {
     public boolean delete(DAOManager dao, Cliente cliente) {
         try {
             dao.open();
-            String sentencia = "DELETE FROM Cliente WHERE `id` = " + cliente.getId();
-            Statement stmt = dao.getConn().createStatement();
-            stmt.executeUpdate(sentencia);
+            String sql = "DELETE FROM Cliente WHERE id = ?";
+            PreparedStatement ps = dao.getConn().prepareStatement(sql);
+            ps.setInt(1, cliente.getId());
+            ps.executeUpdate();
             return true;
         } catch (Exception e) {
             return false;

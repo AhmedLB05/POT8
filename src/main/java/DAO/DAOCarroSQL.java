@@ -6,7 +6,6 @@ import models.Producto;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 
 public class DAOCarroSQL implements DAOCarro {
@@ -17,11 +16,12 @@ public class DAOCarroSQL implements DAOCarro {
     public ArrayList<Producto> readAll(DAOManager dao, Cliente cliente) {
         ArrayList<Producto> productos = new ArrayList<>();
         ArrayList<Integer> listaId = new ArrayList<>();
-        String sentencia = "SELECT idProducto FROM `Carro` WHERE `idCliente`='" + cliente.getId() + "'";
+        String sentencia = "SELECT idProducto FROM Carro WHERE idCliente = ?";
         try {
             dao.open();
             PreparedStatement ps = dao.getConn().prepareStatement(sentencia);
-            try (ResultSet rs = ps.executeQuery()){
+            ps.setInt(1, cliente.getId());
+            try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     listaId.add(rs.getInt("idProducto"));
                 }
@@ -35,9 +35,11 @@ public class DAOCarroSQL implements DAOCarro {
                 throw new RuntimeException(e);
             }
         }
+
+        // Carga los productos completos con los IDs recuperados
         for (Producto p : daoProductoSQL.readAll(dao)) {
-            for (Integer id : listaId) {
-                if (p.getId() == id) productos.add(p);
+            if (listaId.contains(p.getId())) {
+                productos.add(p);
             }
         }
         return productos;
@@ -45,12 +47,13 @@ public class DAOCarroSQL implements DAOCarro {
 
     @Override
     public boolean insert(DAOManager dao, Cliente cliente, Producto producto) {
+        String sql = "INSERT INTO Carro (idCliente, idProducto) VALUES (?, ?)";
         try {
             dao.open();
-            String sentencia = "INSERT INTO `Carro` (`idCliente`, `idProducto`) VALUES ('" + cliente.getId() +
-                    "', '" + producto.getId() + "')";
-            Statement stmt = dao.getConn().createStatement();
-            stmt.executeUpdate(sentencia);
+            PreparedStatement ps = dao.getConn().prepareStatement(sql);
+            ps.setInt(1, cliente.getId());
+            ps.setInt(2, producto.getId());
+            ps.executeUpdate();
             return true;
         } catch (Exception e) {
             return false;
@@ -65,12 +68,13 @@ public class DAOCarroSQL implements DAOCarro {
 
     @Override
     public boolean delete(DAOManager dao, Cliente cliente, Producto producto) {
+        String sql = "DELETE FROM Carro WHERE idCliente = ? AND idProducto = ? LIMIT 1";
         try {
             dao.open();
-            String sentencia = "DELETE FROM Carro WHERE `idCliente` = '" + cliente.getId() + "' AND `idProducto` = '" +
-                    producto.getId() + "' LIMIT 1";
-            Statement stmt = dao.getConn().createStatement();
-            stmt.executeUpdate(sentencia);
+            PreparedStatement ps = dao.getConn().prepareStatement(sql);
+            ps.setInt(1, cliente.getId());
+            ps.setInt(2, producto.getId());
+            ps.executeUpdate();
             return true;
         } catch (Exception e) {
             return false;
@@ -85,11 +89,12 @@ public class DAOCarroSQL implements DAOCarro {
 
     @Override
     public boolean deleteAll(DAOManager dao, Cliente cliente) {
+        String sql = "DELETE FROM Carro WHERE idCliente = ?";
         try {
             dao.open();
-            String sentencia = "DELETE FROM Carro WHERE `idCliente` = '" + cliente.getId() + "'";
-            Statement stmt = dao.getConn().createStatement();
-            stmt.executeUpdate(sentencia);
+            PreparedStatement ps = dao.getConn().prepareStatement(sql);
+            ps.setInt(1, cliente.getId());
+            ps.executeUpdate();
             return true;
         } catch (Exception e) {
             return false;

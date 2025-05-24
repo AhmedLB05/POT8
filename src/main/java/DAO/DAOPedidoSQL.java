@@ -47,14 +47,24 @@ public class DAOPedidoSQL implements DAOPedido {
 
     @Override
     public boolean insert(DAOManager dao, Pedido pedido, Cliente cliente) {
+        String sql = "INSERT INTO Pedido (id, fechaPedido, fechaEntregaEstimada, estado, comentario, idCliente) " +
+                "VALUES (?, ?, ?, ?, ?, ?)";
+
         try {
             dao.open();
-            String sentencia = "INSERT INTO `Pedido` (`id`, `fechaPedido`, `fechaEntregaEstimada`, `estado`, `comentario`, " +
-                    "`idCliente`) VALUES ('" + pedido.getId() + "', '" + pedido.getFechaPedido() + "', '" +
-                    pedido.getFechaEntregaEstimada() + "', '" + pedido.getEstado() + "', '" + pedido.getComentario() +
-                    "', '" + cliente.getId() + "')";
-            Statement stmt = dao.getConn().createStatement();
-            stmt.executeUpdate(sentencia);
+            PreparedStatement ps = dao.getConn().prepareStatement(sql);
+            ps.setInt(1, pedido.getId());
+            ps.setDate(2, Date.valueOf(pedido.getFechaPedido()));
+            if (pedido.getFechaEntregaEstimada() != null) {
+                ps.setDate(3, Date.valueOf(pedido.getFechaEntregaEstimada()));
+            } else {
+                ps.setNull(3, Types.DATE);
+            }
+            ps.setInt(4, pedido.getEstado());
+            ps.setString(5, pedido.getComentario());
+            ps.setInt(6, cliente.getId());
+
+            ps.executeUpdate();
             return true;
         } catch (Exception e) {
             return false;
@@ -69,13 +79,22 @@ public class DAOPedidoSQL implements DAOPedido {
 
     @Override
     public boolean update(DAOManager dao, Pedido pedido) {
+        String sql = "UPDATE Pedido SET fechaPedido = ?, fechaEntregaEstimada = ?, estado = ?, comentario = ? WHERE id = ?";
+
         try {
             dao.open();
-            String sentencia = "UPDATE `Pedido` SET `fechaPedido` = '" + pedido.getFechaPedido() + "', `fechaEntregaEstimada` = '"
-                    + pedido.getFechaEntregaEstimada() + "', `estado` = '" + pedido.getEstado() + "', `comentario` = '" +
-                    pedido.getComentario() + "' WHERE `Pedido`.`id` = " + pedido.getId();
-            Statement stmt = dao.getConn().createStatement();
-            stmt.executeUpdate(sentencia);
+            PreparedStatement ps = dao.getConn().prepareStatement(sql);
+            ps.setDate(1, Date.valueOf(pedido.getFechaPedido()));
+            if (pedido.getFechaEntregaEstimada() != null) {
+                ps.setDate(2, Date.valueOf(pedido.getFechaEntregaEstimada()));
+            } else {
+                ps.setNull(2, Types.DATE);
+            }
+            ps.setInt(3, pedido.getEstado());
+            ps.setString(4, pedido.getComentario());
+            ps.setInt(5, pedido.getId());
+
+            ps.executeUpdate();
             return true;
         } catch (Exception e) {
             return false;
@@ -90,12 +109,15 @@ public class DAOPedidoSQL implements DAOPedido {
 
     @Override
     public boolean updateTrabajador(DAOManager dao, Pedido pedido, Trabajador trabajador) {
+        String sql = "UPDATE Pedido SET idTrabajador = ? WHERE id = ?";
+
         try {
             dao.open();
-            String sentencia = "UPDATE `Pedido` SET `idTrabajador` = '" + trabajador.getId() +
-                    "' WHERE `Pedido`.`id` = " + pedido.getId();
-            Statement stmt = dao.getConn().createStatement();
-            stmt.executeUpdate(sentencia);
+            PreparedStatement ps = dao.getConn().prepareStatement(sql);
+            ps.setInt(1, trabajador.getId());
+            ps.setInt(2, pedido.getId());
+
+            ps.executeUpdate();
             return true;
         } catch (Exception e) {
             return false;
@@ -111,11 +133,12 @@ public class DAOPedidoSQL implements DAOPedido {
     @Override
     public ArrayList<Pedido> readPedidosByIdCliente(DAOManager dao, Cliente cliente) {
         ArrayList<Pedido> pedidos = new ArrayList<>();
-        String sentencia = "SELECT * FROM Pedido WHERE `idCliente` = '" + cliente.getId() + "'";
+        String sql = "SELECT * FROM Pedido WHERE idCliente = ?";
 
         try {
             dao.open();
-            PreparedStatement ps = dao.getConn().prepareStatement(sentencia);
+            PreparedStatement ps = dao.getConn().prepareStatement(sql);
+            ps.setInt(1, cliente.getId());
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     Timestamp fechaPedidoTS = rs.getTimestamp("fechaPedido");
@@ -138,17 +161,19 @@ public class DAOPedidoSQL implements DAOPedido {
                 throw new RuntimeException(e);
             }
         }
+
         return pedidos;
     }
 
     @Override
     public ArrayList<Pedido> readPedidosByIdTrabajador(DAOManager dao, Trabajador trabajador) {
         ArrayList<Pedido> pedidos = new ArrayList<>();
-        String sentencia = "SELECT * FROM Pedido WHERE `idTrabajador` = '" + trabajador.getId() + "'";
+        String sql = "SELECT * FROM Pedido WHERE idTrabajador = ?";
 
         try {
             dao.open();
-            PreparedStatement ps = dao.getConn().prepareStatement(sentencia);
+            PreparedStatement ps = dao.getConn().prepareStatement(sql);
+            ps.setInt(1, trabajador.getId());
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     Timestamp fechaPedidoTS = rs.getTimestamp("fechaPedido");
