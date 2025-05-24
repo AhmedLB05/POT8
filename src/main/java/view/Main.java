@@ -61,8 +61,6 @@ public class Main {
             System.out.println("____________________________________________________________________________________________________");
             Utils.pulsaParaContinuar();
         }
-
-
         if (clientesVacios) {
             String respuesta;
             do {
