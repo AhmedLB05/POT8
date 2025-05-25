@@ -225,6 +225,4 @@ public class Cliente implements Serializable {
         }
         return false;
     }
-
-
 }

@@ -476,6 +476,4 @@ public class EnvioMail {
             e.printStackTrace();
         }
     }
-
-
 }

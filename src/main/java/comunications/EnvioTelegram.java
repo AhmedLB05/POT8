@@ -51,24 +51,7 @@ public class EnvioTelegram {
     }
 
     public static void enviaMensajeTrabajadorPedidoAsignado(Trabajador t, Pedido p) {
-        String mensajeEnviar = "📦 Asignación de Pedido 📦\n" +
-                "\n" +
-                "¡Hola, " + t.getNombre() + "! 👋\n" +
-                "\n" +
-                "Se te ha asignado un nuevo pedido. A continuación, los detalles:\n" +
-                "\n" +
-                "🔢 ID del Pedido: " + p.getId() + "\n" +
-                "📅 Fecha del Pedido: " + p.getFechaPedido() + "\n" +
-                "📅 Fecha de Entrega Estimada: " + p.getFechaEntregaEstimada() + "\n" +
-                "🟢 Estado del Pedido: " + p.devuelveEstado(p.getEstado()) + "\n" +
-                "📝 Comentarios: " + p.getComentario() + "\n" +
-                "\n" +
-                "📦 Productos:\n" +
-                pintaListaProductosTelegram(p.getProductos()) + "\n" +
-                "\n" +
-                "Por favor, revisa la información y procede según lo planificado.\n" +
-                "\n" +
-                "Gracias por tu atención. 🙌";
+        String mensajeEnviar = "📦 Asignación de Pedido 📦\n" + "\n" + "¡Hola, " + t.getNombre() + "! 👋\n" + "\n" + "Se te ha asignado un nuevo pedido. A continuación, los detalles:\n" + "\n" + "🔢 ID del Pedido: " + p.getId() + "\n" + "📅 Fecha del Pedido: " + p.getFechaPedido() + "\n" + "📅 Fecha de Entrega Estimada: " + p.getFechaEntregaEstimada() + "\n" + "🟢 Estado del Pedido: " + p.devuelveEstado(p.getEstado()) + "\n" + "📝 Comentarios: " + p.getComentario() + "\n" + "\n" + "📦 Productos:\n" + pintaListaProductosTelegram(p.getProductos()) + "\n" + "\n" + "Por favor, revisa la información y procede según lo planificado.\n" + "\n" + "Gracias por tu atención. 🙌";
         enviaMensajeTelegram(mensajeEnviar);
     }
 }

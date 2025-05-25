@@ -1,11 +1,11 @@
 package controller;
 
-import DAO.*;
 import comunications.EnvioMail;
 import comunications.EnvioTelegram;
 import data.DataProductos;
 import models.*;
 import persistencia.Persistencia;
+import utils.Utils;
 
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -15,98 +15,97 @@ import java.util.Iterator;
 public class Controlador implements Serializable {
 
     //Atributos
-    private DAOManager dao;
-    private DAOAdminSQL daoAdminSQL;
-    private DAOCarroSQL daoCarroSQL;
-    private DAOClienteSQL daoClienteSQL;
-    private DAOPedidoProductosSQL daoPedidoProductosSQL;
-    private DAOPedidoSQL daoPedidoSQL;
-    private DAOProductoSQL daoProductoSQL;
-    private DAOTrabajadorSQL daoTrabajadorSQL;
+    private ArrayList<Cliente> clientes;
+    private ArrayList<Trabajador> trabajadores;
+    private ArrayList<Admin> admins;
+    private ArrayList<Producto> catalogo;
 
     //Constructor
     public Controlador() {
-        dao = DAOManager.getSinglentonInstance();
-        daoAdminSQL = new DAOAdminSQL();
-        daoCarroSQL = new DAOCarroSQL();
-        daoClienteSQL = new DAOClienteSQL();
-        daoPedidoProductosSQL = new DAOPedidoProductosSQL();
-        daoPedidoSQL = new DAOPedidoSQL();
-        daoProductoSQL = new DAOProductoSQL();
-        daoTrabajadorSQL = new DAOTrabajadorSQL();
-
-        ArrayList<Producto> catalogo = DataProductos.getProductosMock();
-        if (daoProductoSQL.readAll(dao).isEmpty()) {
-            mockCatalogo(catalogo);
-        }
-        iniciaDatosAdmin();
-    }
-
-    private void mockCatalogo(ArrayList<Producto> catalogo) {
-        for (Producto p : catalogo) {
-            daoProductoSQL.insert(dao, p);
-        }
-    }
-
-    public void iniciaDatosAdmin() {
-        //admins.add(new Admin(generaIdAdmin(), "admin", "admin", "admin@admin.com"));
-        daoAdminSQL.insert(dao, new Admin(generaIdAdmin(), "admin", "admin", "admin@admin.com"));
+        clientes = Persistencia.leeClientes();
+        trabajadores = Persistencia.leeTrabajadores();
+        admins = Persistencia.leeAdmin();
+        catalogo = Persistencia.leeProductos();
     }
 
     public void iniciaDatosCliente() {
-        Cliente cliente1 = new Cliente(generaIdCliente(), "ahmedlb26205@gmail.com", "123", "Ahmed",
-                "Torredelcampo", "Jaén", "Calle Federico Garcia Lorca", 631788372);
-        Cliente cliente2 = new Cliente(generaIdCliente(), "marcos.lara.0610@fernando3martos.com", "123", "Marcos",
-                "Martos", "Jaén", "Calle Ramon Garay", 672929324);
-        daoClienteSQL.insert(dao, cliente1);
-        daoClienteSQL.insert(dao, cliente2);
+        clientes.add(new Cliente(generaIdCliente(), "ahmedlb26205@gmail.com", "123", "Ahmed", "Torredelcampo", "Jaén", "Federico Garcia Lorca", 631788372));
+        clientes.add(new Cliente(generaIdCliente(), "marcos.lara.0610@fernando3martos.com", "123", "Marcos", "Martos", "Jaén", "Calle Ramon Garay", 672929324));
+        Utils.mensajeGuardadoPersistencia(Persistencia.guardaClientesPersistencia(clientes));
     }
 
     public void iniciaDatosTrabajadores() {
-        Trabajador trabajador1 = new Trabajador(generaIdTrabajador(), "Carlos", "123",
-                "ahmed.lhaouchi.2602@fernando3martos.com", 672839234);
-        Trabajador trabajador2 = new Trabajador(generaIdTrabajador(), "Juan", "123",
-                "marcoscano2005@gmail.com", 672812344);
-        daoTrabajadorSQL.insert(dao, trabajador1);
-        daoTrabajadorSQL.insert(dao, trabajador2);
+        trabajadores.add(new Trabajador(generaIdTrabajador(), "Carlos", "123", "ahmed.lhaouchi.2602@fernando3martos.com", 672839234));
+        trabajadores.add(new Trabajador(generaIdTrabajador(), "Juan", "123", "marcoscano2005@gmail.com", 672812344));
+        Utils.mensajeGuardadoPersistencia(Persistencia.guardaTrabajadoresPersistencia(trabajadores));
     }
+
+    public void iniciaDatosAdmin() {
+        admins.add(new Admin(generaIdAdmin(), "admin", "admin", "admin@admin.com"));
+        Utils.mensajeGuardadoPersistencia(Persistencia.guardaAdminsPersistencia(admins));
+    }
+
+    public void iniciaDatosCatalogo() {
+        catalogo = DataProductos.getProductosMock();
+        Utils.mensajeGuardadoPersistencia(Persistencia.guardaProductosPersistencia(catalogo));
+    }
+
 
     //Getters y Setters
     public ArrayList<Cliente> getClientes() {
-        return daoClienteSQL.readAll(dao);
+        return clientes;
+    }
+
+    public void setClientes(ArrayList<Cliente> clientes) {
+        this.clientes = clientes;
     }
 
     public ArrayList<Trabajador> getTrabajadores() {
-        return daoTrabajadorSQL.readAll(dao);
+        return trabajadores;
+    }
+
+    public void setTrabajadores(ArrayList<Trabajador> trabajadores) {
+        this.trabajadores = trabajadores;
     }
 
     public ArrayList<Admin> getAdmins() {
-        return daoAdminSQL.read(dao);
+        return admins;
+    }
+
+    public void setAdmins(ArrayList<Admin> admins) {
+        this.admins = admins;
     }
 
     public ArrayList<Producto> getCatalogo() {
-        return daoProductoSQL.readAll(dao);
+        return catalogo;
+    }
+
+    public void setCatalogo(ArrayList<Producto> catalogo) {
+        this.catalogo = catalogo;
     }
 
     //Otros metodos
 
     //Metodo para el login que devuelve el tipo de objeto
     public Object login(String email, String clave) {
-        for (Cliente c : getClientes()) {
+        for (Cliente c : clientes) {
             if (c.login(email, clave)) {
                 Persistencia.inicioSesionLog(c);
+                //guardaUltimoInicioSesion(c); Aqui no funciona porque sino cada vez que iniciemos sesion coge la fecha nueva
                 return c;
             }
         }
-        for (Trabajador t : getTrabajadores()) {
+        for (Trabajador t : trabajadores) {
             if (t.login(email, clave)) {
                 Persistencia.inicioSesionLog(t);
+                //guardaUltimoInicioSesion(t); Aqui no funciona porque sino cada vez que iniciemos sesion coge la fecha nueva
                 return t;
             }
         }
-        for (Admin a : getAdmins()) {
+        for (Admin a : admins) {
             if (a.login(email, clave)) {
                 Persistencia.inicioSesionLog(a);
+                //guardaUltimoInicioSesion(a); Aqui no funciona porque sino cada vez que iniciemos sesion coge la fecha nueva
                 return a;
             }
         }

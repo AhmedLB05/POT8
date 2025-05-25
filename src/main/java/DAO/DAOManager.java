@@ -6,11 +6,11 @@ import java.sql.SQLException;
 
 public class DAOManager {
 
-    private Connection conn;
+    private static DAOManager singlenton; //Atributo estatico que guarda una referencia al DAO
     private final String URL;
     private final String USER;
     private final String PASS;
-    private static DAOManager singlenton; //Atributo estatico que guarda una referencia al DAO
+    private Connection conn;
 
     public DAOManager() { //Constructor privado para que no se pueda llamar las veces que se quiera
         this.conn = null;

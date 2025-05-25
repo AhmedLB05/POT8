@@ -19,5 +19,4 @@ public interface DAOPedido {
     public boolean updateTrabajador(DAOManager dao, Pedido pedido, Trabajador trabajador);
 
     public ArrayList<Pedido> readPedidosByIdCliente(DAOManager dao, Cliente c);
-
 }

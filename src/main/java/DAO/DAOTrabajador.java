@@ -5,7 +5,6 @@ import models.Trabajador;
 import java.util.ArrayList;
 
 public interface DAOTrabajador {
-
     public ArrayList<Trabajador> readAll(DAOManager dao);
 
     public boolean insert(DAOManager dao, Trabajador trabajador);
@@ -14,4 +13,5 @@ public interface DAOTrabajador {
 
     public boolean delete(DAOManager dao, Trabajador trabajador);
 
+    public Trabajador buscaTrabajadorPrueba(DAOManager dao);
 }
