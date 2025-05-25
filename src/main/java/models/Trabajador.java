@@ -1,5 +1,8 @@
 package models;
 
+import DAO.DAOManager;
+import DAO.DAOPedidoSQL;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 
@@ -12,6 +15,10 @@ public class Trabajador implements Serializable {
     private String email;
     private int movil;
     private ArrayList<Pedido> pedidosAsignados;
+
+    //DAO
+    private DAOManager dao = DAOManager.getSinglentonInstance();
+    private DAOPedidoSQL daoPedidoSQL = new DAOPedidoSQL();
 
     //Constructor
     public Trabajador(int idGenerada, String nombre, String pass, String email, int movil) {
@@ -80,7 +87,7 @@ public class Trabajador implements Serializable {
     }
 
     public ArrayList<Pedido> getPedidosAsignados() {
-        return pedidosAsignados;
+        return daoPedidoSQL.readPedidosByIdTrabajador(dao, this);
     }
 
     public void setPedidosAsignados(ArrayList<Pedido> pedidosAsignados) {
@@ -116,24 +123,24 @@ public class Trabajador implements Serializable {
     //Metodo que agrega un pedido a los pedidosAsignados
     public boolean asignaPedido(Pedido p) {
         if (p == null || pedidosAsignados.contains(p)) return false;
-        pedidosAsignados.add(p);
-        return true;
+        return pedidosAsignados.add(p);
     }
 
-    //Metodo que agrega los pedidos EN PREPARACION a un Array (según el estado = 1 En preparacion) y lo devuelve
+    //Metodo que agrega los pedidos EN PREPARACION o ENVIADO a un Array (según el estado = 1 En preparacion = 2 Enviado)
+    // y lo devuelve
     public ArrayList<Pedido> getPedidosPendientes() {
         ArrayList<Pedido> pedidosAsignadosPendientes = new ArrayList<>();
-        for (Pedido p : pedidosAsignados) {
-            if (p.getEstado() == 0 || p.getEstado() == 1 || p.getEstado() == 2) pedidosAsignadosPendientes.add(p);
+        for (Pedido p : getPedidosAsignados()) {
+            if (p.getEstado() == 1 || p.getEstado() == 2) pedidosAsignadosPendientes.add(p);
         }
         return pedidosAsignadosPendientes;
     }
 
-    //Metodo que agrega los pedidos ENVIADO a un Array (según el estado = 2 ENVIADO) y lo devuelve
+    //Metodo que agrega los pedidos ENVIADO a un Array (según el estado = 3 ENTREGADO o = 4 CANCELADO) y lo devuelve
     public ArrayList<Pedido> getPedidosCompletados() {
         ArrayList<Pedido> pedidosAsignadosCompletados = new ArrayList<>();
-        for (Pedido p : pedidosAsignados) {
-            if (p.getEstado() == 2) pedidosAsignadosCompletados.add(p);
+        for (Pedido p : getPedidosAsignados()) {
+            if (p.getEstado() == 3 || p.getEstado() == 4) pedidosAsignadosCompletados.add(p);
         }
         return pedidosAsignadosCompletados;
     }
