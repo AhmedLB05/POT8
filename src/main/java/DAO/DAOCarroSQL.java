@@ -9,6 +9,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 
 public class DAOCarroSQL implements DAOCarro {
+
     private final DAOProductoSQL daoProductoSQL = new DAOProductoSQL();
 
     @Override
@@ -19,14 +20,22 @@ public class DAOCarroSQL implements DAOCarro {
 
         try {
             dao.open();
-            PreparedStatement ps = dao.getConn().prepareStatement(sentencia);
-            ps.setInt(1, cliente.getId());
-
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    listaId.add(rs.getInt("idProducto"));
+            try (PreparedStatement ps = dao.getConn().prepareStatement(sentencia)) {
+                ps.setInt(1, cliente.getId());
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        listaId.add(rs.getInt("idProducto"));
+                    }
                 }
             }
+
+            // Ahora lee todos los productos de una sola vez SIN cerrar la conexión
+            for (Producto p : daoProductoSQL.readAll(dao)) {
+                if (listaId.contains(p.getId())) {
+                    productos.add(p);
+                }
+            }
+
         } catch (Exception e) {
             throw new RuntimeException("Error al leer productos del carro", e);
         } finally {
@@ -34,12 +43,6 @@ public class DAOCarroSQL implements DAOCarro {
                 dao.close();
             } catch (SQLException e) {
                 throw new RuntimeException("Error al cerrar la conexión", e);
-            }
-        }
-
-        for (Producto p : daoProductoSQL.readAll(dao)) {
-            if (listaId.contains(p.getId())) {
-                productos.add(p);
             }
         }
 
@@ -52,11 +55,12 @@ public class DAOCarroSQL implements DAOCarro {
 
         try {
             dao.open();
-            PreparedStatement ps = dao.getConn().prepareStatement(sentencia);
-            ps.setInt(1, cliente.getId());
-            ps.setInt(2, producto.getId());
-            ps.executeUpdate();
-            return true;
+            try (PreparedStatement ps = dao.getConn().prepareStatement(sentencia)) {
+                ps.setInt(1, cliente.getId());
+                ps.setInt(2, producto.getId());
+                ps.executeUpdate();
+                return true;
+            }
         } catch (Exception e) {
             return false;
         } finally {
@@ -74,11 +78,12 @@ public class DAOCarroSQL implements DAOCarro {
 
         try {
             dao.open();
-            PreparedStatement ps = dao.getConn().prepareStatement(sentencia);
-            ps.setInt(1, cliente.getId());
-            ps.setInt(2, producto.getId());
-            ps.executeUpdate();
-            return true;
+            try (PreparedStatement ps = dao.getConn().prepareStatement(sentencia)) {
+                ps.setInt(1, cliente.getId());
+                ps.setInt(2, producto.getId());
+                ps.executeUpdate();
+                return true;
+            }
         } catch (Exception e) {
             return false;
         } finally {
@@ -96,10 +101,11 @@ public class DAOCarroSQL implements DAOCarro {
 
         try {
             dao.open();
-            PreparedStatement ps = dao.getConn().prepareStatement(sentencia);
-            ps.setInt(1, cliente.getId());
-            ps.executeUpdate();
-            return true;
+            try (PreparedStatement ps = dao.getConn().prepareStatement(sentencia)) {
+                ps.setInt(1, cliente.getId());
+                ps.executeUpdate();
+                return true;
+            }
         } catch (Exception e) {
             return false;
         } finally {

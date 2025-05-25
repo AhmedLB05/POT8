@@ -8,6 +8,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 
 public class DAOClienteSQL implements DAOCliente {
+
     private final DAOPedidoSQL daoPedidoSQL = new DAOPedidoSQL();
     private final DAOCarroSQL daoCarroSQL = new DAOCarroSQL();
 
@@ -18,8 +19,9 @@ public class DAOClienteSQL implements DAOCliente {
 
         try {
             dao.open();
-            PreparedStatement ps = dao.getConn().prepareStatement(sentencia);
-            try (ResultSet rs = ps.executeQuery()) {
+            try (PreparedStatement ps = dao.getConn().prepareStatement(sentencia);
+                 ResultSet rs = ps.executeQuery()) {
+
                 while (rs.next()) {
                     Cliente cliente = new Cliente(
                             rs.getInt("id"),
@@ -33,6 +35,13 @@ public class DAOClienteSQL implements DAOCliente {
                     );
                     clientes.add(cliente);
                 }
+
+                // Cargar pedidos y carro usando la misma conexión abierta
+                for (Cliente c : clientes) {
+                    c.setPedidos(daoPedidoSQL.readPedidosByIdCliente(dao, c));
+                    c.setCarro(daoCarroSQL.readAll(dao, c));
+                }
+
             }
         } catch (Exception e) {
             throw new RuntimeException("Error al leer los clientes", e);
@@ -42,11 +51,6 @@ public class DAOClienteSQL implements DAOCliente {
             } catch (SQLException e) {
                 throw new RuntimeException("Error al cerrar la conexión", e);
             }
-        }
-
-        for (Cliente c : clientes) {
-            c.setPedidos(daoPedidoSQL.readPedidosByIdCliente(dao, c));
-            c.setCarro(daoCarroSQL.readAll(dao, c));
         }
 
         return clientes;
@@ -59,18 +63,19 @@ public class DAOClienteSQL implements DAOCliente {
 
         try {
             dao.open();
-            PreparedStatement ps = dao.getConn().prepareStatement(sentencia);
-            ps.setInt(1, cliente.getId());
-            ps.setString(2, cliente.getEmail());
-            ps.setString(3, cliente.getClave());
-            ps.setString(4, cliente.getNombre());
-            ps.setString(5, cliente.getLocalidad());
-            ps.setString(6, cliente.getProvincia());
-            ps.setString(7, cliente.getDireccion());
-            ps.setInt(8, cliente.getMovil());
+            try (PreparedStatement ps = dao.getConn().prepareStatement(sentencia)) {
+                ps.setInt(1, cliente.getId());
+                ps.setString(2, cliente.getEmail());
+                ps.setString(3, cliente.getClave());
+                ps.setString(4, cliente.getNombre());
+                ps.setString(5, cliente.getLocalidad());
+                ps.setString(6, cliente.getProvincia());
+                ps.setString(7, cliente.getDireccion());
+                ps.setInt(8, cliente.getMovil());
 
-            ps.executeUpdate();
-            return true;
+                ps.executeUpdate();
+                return true;
+            }
         } catch (Exception e) {
             return false;
         } finally {
@@ -89,18 +94,19 @@ public class DAOClienteSQL implements DAOCliente {
 
         try {
             dao.open();
-            PreparedStatement ps = dao.getConn().prepareStatement(sentencia);
-            ps.setString(1, cliente.getEmail());
-            ps.setString(2, cliente.getClave());
-            ps.setString(3, cliente.getNombre());
-            ps.setString(4, cliente.getLocalidad());
-            ps.setString(5, cliente.getProvincia());
-            ps.setString(6, cliente.getDireccion());
-            ps.setInt(7, cliente.getMovil());
-            ps.setInt(8, cliente.getId());
+            try (PreparedStatement ps = dao.getConn().prepareStatement(sentencia)) {
+                ps.setString(1, cliente.getEmail());
+                ps.setString(2, cliente.getClave());
+                ps.setString(3, cliente.getNombre());
+                ps.setString(4, cliente.getLocalidad());
+                ps.setString(5, cliente.getProvincia());
+                ps.setString(6, cliente.getDireccion());
+                ps.setInt(7, cliente.getMovil());
+                ps.setInt(8, cliente.getId());
 
-            ps.executeUpdate();
-            return true;
+                ps.executeUpdate();
+                return true;
+            }
         } catch (Exception e) {
             return false;
         } finally {
@@ -118,10 +124,11 @@ public class DAOClienteSQL implements DAOCliente {
 
         try {
             dao.open();
-            PreparedStatement ps = dao.getConn().prepareStatement(sentencia);
-            ps.setInt(1, cliente.getId());
-            ps.executeUpdate();
-            return true;
+            try (PreparedStatement ps = dao.getConn().prepareStatement(sentencia)) {
+                ps.setInt(1, cliente.getId());
+                ps.executeUpdate();
+                return true;
+            }
         } catch (Exception e) {
             return false;
         } finally {

@@ -8,15 +8,17 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 
 public class DAOAdminSQL implements DAOAdmin {
+
     @Override
     public ArrayList<Admin> read(DAOManager dao) {
         ArrayList<Admin> lista = new ArrayList<>();
-        String sentencia = "SELECT * FROM Admin";
+        String sentencia = "SELECT id, nombre, clave, email FROM Admin"; // Más claro y explícito
 
         try {
             dao.open();
-            PreparedStatement ps = dao.getConn().prepareStatement(sentencia);
-            try (ResultSet rs = ps.executeQuery()) {
+            try (PreparedStatement ps = dao.getConn().prepareStatement(sentencia);
+                 ResultSet rs = ps.executeQuery()) {
+
                 while (rs.next()) {
                     lista.add(new Admin(
                             rs.getInt("id"),
@@ -25,14 +27,17 @@ public class DAOAdminSQL implements DAOAdmin {
                             rs.getString("email")
                     ));
                 }
+
             }
-        } catch (Exception e) {
+        } catch (SQLException e) {
             throw new RuntimeException("Error al leer administradores", e);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         } finally {
             try {
                 dao.close();
             } catch (SQLException e) {
-                throw new RuntimeException("Error al cerrar conexión", e);
+                throw new RuntimeException("Error al cerrar la conexión", e);
             }
         }
 
@@ -45,21 +50,25 @@ public class DAOAdminSQL implements DAOAdmin {
 
         try {
             dao.open();
-            PreparedStatement ps = dao.getConn().prepareStatement(sentencia);
-            ps.setInt(1, admin.getId());
-            ps.setString(2, admin.getNombre());
-            ps.setString(3, admin.getClave());
-            ps.setString(4, admin.getEmail());
+            try (PreparedStatement ps = dao.getConn().prepareStatement(sentencia)) {
+                ps.setInt(1, admin.getId());
+                ps.setString(2, admin.getNombre());
+                ps.setString(3, admin.getClave());
+                ps.setString(4, admin.getEmail());
 
-            ps.executeUpdate();
-            return true;
+                int rowsAffected = ps.executeUpdate();
+                return rowsAffected > 0;
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Error al insertar administrador", e);
         } catch (Exception e) {
-            return false;
+            throw new RuntimeException(e);
         } finally {
             try {
                 dao.close();
             } catch (SQLException e) {
-                throw new RuntimeException("Error al cerrar conexión", e);
+                return false;
             }
         }
     }
