@@ -46,9 +46,9 @@ public class Main {
         if (controlador.getClientes().isEmpty()) clientesVacios = true;
         if (controlador.getTrabajadores().isEmpty()) trabajadoresVacios = true;
         if (controlador.getAdmins().isEmpty()) adminsVacios = true;
-        if (controlador.getCatalogo().isEmpty()) productosVacios = true;
+        //if (controlador.getCatalogo().isEmpty()) productosVacios = true;
 
-        if (!clientesVacios || !trabajadoresVacios || !adminsVacios || !productosVacios) {
+        if (!clientesVacios || !trabajadoresVacios /*|| !adminsVacios || !productosVacios*/) {
             System.out.println("____________________________________________________________________________________________________");
             if (!clientesVacios)
                 System.out.println(" - Hay " + controlador.getClientes().size() + " cliente/s ya cargado/s en el sistema");
@@ -115,7 +115,7 @@ public class Main {
 
 
         }
-        if (adminsVacios) {
+        /*if (adminsVacios) {
             String respuesta;
             do {
                 System.out.print("¿Desea agregar datos de ADMINS de prueba? (S/N): ");
@@ -132,11 +132,11 @@ public class Main {
                             email: admin@admin.com
                             clave: admin
                         """);
-                controlador.iniciaDatosAdmin();
+                controlador.mockAdmin();
                 Utils.pulsaParaContinuar();
             }
-        }
-        if (productosVacios) {
+        }*/
+        /*if (productosVacios) {
             String respuesta;
             do {
                 System.out.print("¿Desea agregar datos de PRODUCTOS de prueba? (S/N): ");
@@ -144,8 +144,8 @@ public class Main {
                 if (!respuesta.equalsIgnoreCase("s") && !respuesta.equalsIgnoreCase("n"))
                     System.out.println(" * ERROR DEBE RESPONDER CON S o N");
             } while (!respuesta.equalsIgnoreCase("s") && !respuesta.equalsIgnoreCase("n"));
-            if (respuesta.equalsIgnoreCase("s")) controlador.iniciaDatosCatalogo();
-        }
+            if (respuesta.equalsIgnoreCase("s")) controlador.mockCatalogo();
+        }*/
 
     }
 
@@ -540,13 +540,13 @@ public class Main {
         } while (!respuesta.equalsIgnoreCase("s") && !respuesta.equalsIgnoreCase("n") && !respuesta.equals("-1"));
         if (respuesta.equals("-1")) return;
         if (respuesta.equalsIgnoreCase("s")) {
-            if (controlador.recuperaBackup()) {
+            /*if (controlador.recuperaBackup()) {
                 System.out.println(" - COPIA DE SEGURIDAD RECUPERADA CON EXITO");
                 controlador.guardaClientes();
                 controlador.guardaTrabajadores();
                 controlador.guardaAdmin();
                 controlador.guardaCatalogo();
-            } else System.out.println(" * ERROR NO SE HA PODIDO RECUPERAR LA COPIA DE SEGURIDAD");
+            } else System.out.println(" * ERROR NO SE HA PODIDO RECUPERAR LA COPIA DE SEGURIDAD");*/
         }
         if (respuesta.equalsIgnoreCase("n")) {
             String ruta;
@@ -560,13 +560,13 @@ public class Main {
             Utils.pulsaParaContinuar();
             System.out.print("Introduzca la ruta desde donde desea recuperar la copia de seguridad: ");
             ruta = S.nextLine();
-            if (controlador.recuperaBackupPersonalizado(ruta)) {
+            /*if (controlador.recuperaBackupPersonalizado(ruta)) {
                 System.out.println(" - COPIA DE SEGURIDAD RECUPERADA CON EXITO");
                 controlador.guardaClientes();
                 controlador.guardaTrabajadores();
                 controlador.guardaAdmin();
                 controlador.guardaCatalogo();
-            } else System.out.println(" * ERROR NO SE HA PODIDO RECUPERAR LA COPIA DE SEGURIDAD");
+            } else System.out.println(" * ERROR NO SE HA PODIDO RECUPERAR LA COPIA DE SEGURIDAD");*/
         }
 
     }
@@ -1237,7 +1237,7 @@ public class Main {
     //Metodo que se encarga de modificar los datos de un trabajador
     private static void modificaDatosTrabajador(Controlador controlador, Trabajador trabajador) {
         int opcion;
-        Trabajador trabajadorCambiaDatos = new Trabajador(trabajador);
+        Trabajador trabajadorCambiaDatos = controlador.buscaTrabajadorByID(trabajador.getId());
         do {
             System.out.println();
             System.out.println("=================================");
@@ -1263,8 +1263,7 @@ public class Main {
                 System.out.print("Introduzca nuevo nombre: ");
                 String nombre = S.nextLine();
                 trabajadorCambiaDatos.setNombre(nombre);
-                controlador.actualizaDatosTrabajador(trabajador, trabajadorCambiaDatos);
-                trabajador.setNombre(nombre);
+                controlador.actualizaDatosTrabajador(trabajadorCambiaDatos);
             }
             if (opcion == 1 || opcion == 8) {
                 String claveAnterior, claveNueva;
@@ -1283,8 +1282,7 @@ public class Main {
                         System.out.println(" * ERROR LA NUEVA CLAVE ES IGUAL A LA ANTERIOR");
                     else {
                         trabajadorCambiaDatos.setPass(claveNueva);
-                        controlador.actualizaDatosTrabajador(trabajador, trabajadorCambiaDatos);
-                        trabajador.setPass(claveNueva);
+                        controlador.actualizaDatosTrabajador(trabajadorCambiaDatos);
                         System.out.println(" - SU CLAVE HA SIDO CAMBIADA CON ÉXITO: " + claveNueva);
                     }
                 }
@@ -1298,10 +1296,9 @@ public class Main {
                     System.out.println(" * ERROR YA EXISTE UN CLIENTE CON ESTE EMAIL");
                 else if (verificacionTrabajador(email)) {
                     trabajadorCambiaDatos.setEmail(email);
+                    controlador.actualizaDatosTrabajador(trabajadorCambiaDatos);
                     System.out.println(" - SU EMAIL HA SIDO CAMBIADO CON ÉXITO");
                 } else System.out.println(" * ERROR AL VERTIFICAR EL NUEVO EMAIL");
-                controlador.actualizaDatosTrabajador(trabajador, trabajadorCambiaDatos);
-                trabajador.setEmail(email);
             }
             if (opcion == 1 || opcion == 5) { //MOVIL
                 int movil;
@@ -1316,9 +1313,10 @@ public class Main {
                 } while (true);
                 if (!(movil > 99999999 && movil <= 999999999))
                     System.out.println(" * ERROR: NUMERO INTRODUCIDO ERRÓNEO");
-                else trabajadorCambiaDatos.setMovil(movil);
-                controlador.actualizaDatosTrabajador(trabajador, trabajadorCambiaDatos);
-                trabajador.setMovil(movil);
+                else {
+                    trabajadorCambiaDatos.setMovil(movil);
+                    controlador.actualizaDatosTrabajador(trabajadorCambiaDatos);
+                }
             }
             if (opcion == 6) Utils.mensajeCierraPrograma();
         } while (opcion != 6);
@@ -1880,7 +1878,8 @@ public class Main {
     }
 
     //Metodo que modifica los datos del cliente
-    private static void modificaDatosCliente(Controlador controlador, Cliente cliente) {
+    private static void modificaDatosCliente(Controlador controlador, Cliente clientePasado) {
+        Cliente clienteModificar = controlador.buscaClienteById(clientePasado.getId());
         int opcion;
         do {
             System.out.println();
@@ -1909,30 +1908,26 @@ public class Main {
             if (opcion == 1 || opcion == 2) {
                 System.out.print("Introduzca nuevo nombre: ");
                 String nombre = S.nextLine();
-                cliente.setNombre(nombre);
-                controlador.actualizaDatosCliente(cliente, cliente);
-                cliente.setNombre(nombre);
+                clienteModificar.setNombre(nombre);
+                controlador.actualizaDatosCliente(clienteModificar);
             }
             if (opcion == 1 || opcion == 3) {
                 System.out.print("Introduzca nueva localidad: ");
                 String localidad = S.nextLine();
-                cliente.setLocalidad(localidad);
-                controlador.actualizaDatosCliente(cliente, cliente);
-                cliente.setLocalidad(localidad);
+                clienteModificar.setLocalidad(localidad);
+                controlador.actualizaDatosCliente(clienteModificar);
             }
             if (opcion == 1 || opcion == 4) {
                 System.out.print("Introduzca nueva provincia: ");
                 String provincia = S.nextLine();
-                cliente.setProvincia(provincia);
-                controlador.actualizaDatosCliente(cliente, cliente);
-                cliente.setProvincia(provincia);
+                clienteModificar.setProvincia(provincia);
+                controlador.actualizaDatosCliente(clienteModificar);
             }
             if (opcion == 1 || opcion == 5) {
                 System.out.print("Introduzca nueva dirección: ");
                 String direccion = S.nextLine();
-                cliente.setDireccion(direccion);
-                controlador.actualizaDatosCliente(cliente, cliente);
-                cliente.setDireccion(direccion);
+                clienteModificar.setDireccion(direccion);
+                controlador.actualizaDatosCliente(clienteModificar);
             }
             if (opcion == 1 || opcion == 6) {
                 int movil;
@@ -1947,9 +1942,8 @@ public class Main {
                 } while (true);
                 if (!(movil > 99999999 && movil <= 999999999))
                     System.out.println(" * ERROR: NUMERO INTRODUCIDO ERRÓNEO");
-                else cliente.setMovil(movil);
-                controlador.actualizaDatosCliente(cliente, cliente);
-                cliente.setMovil(movil);
+                else clienteModificar.setMovil(movil);
+                controlador.actualizaDatosCliente(clienteModificar);
             }
             if (opcion == 1 || opcion == 7) {
                 System.out.print("Introduzca nuevo email: ");
@@ -1958,18 +1952,17 @@ public class Main {
                 if (controlador.buscaClienteByEmail(email) != null)
                     System.out.println(" * ERROR YA EXISTE UN CLIENTE CON ESTE EMAIL");
                 else if (verificacionCliente(email)) {
-                    cliente.setEmail(email);
+                    clienteModificar.setEmail(email);
+                    controlador.actualizaDatosCliente(clienteModificar);
                     System.out.println(" - SU EMAIL HA SIDO CAMBIADO CON ÉXITO");
                 } else System.out.println(" * ERROR AL VERTIFICAR EL NUEVO EMAIL");
-                controlador.actualizaDatosCliente(cliente, cliente);
-                cliente.setEmail(email);
             }
             if (opcion == 1 || opcion == 8) {
                 String claveAnterior, claveNueva;
                 System.out.print("Introduzca clave anterior: ");
                 claveAnterior = S.nextLine();
 
-                if (!cliente.getClave().equals(claveAnterior)) System.out.println(" * ERROR CLAVE NO VÁLIDA");
+                if (!clienteModificar.getClave().equals(claveAnterior)) System.out.println(" * ERROR CLAVE NO VÁLIDA");
                 else {
                     System.out.println();
                     System.out.println(" * CLAVE CORRECTA");
@@ -1979,9 +1972,8 @@ public class Main {
                     if (claveNueva.equals(claveAnterior))
                         System.out.println(" * ERROR LA NUEVA CLAVE ES IGUAL A LA ANTERIOR");
                     else {
-                        cliente.setClave(claveNueva);
-                        controlador.actualizaDatosCliente(cliente, cliente);
-                        cliente.setClave(claveNueva);
+                        clienteModificar.setClave(claveNueva);
+                        controlador.actualizaDatosCliente(clienteModificar);
                         System.out.println(" - SU CLAVE HA SIDO CAMBIADA CON ÉXITO: " + claveNueva);
                     }
                 }

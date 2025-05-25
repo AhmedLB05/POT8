@@ -10,7 +10,7 @@ import java.util.ArrayList;
 public class DAOAdminSQL implements DAOAdmin {
 
     @Override
-    public ArrayList<Admin> read(DAOManager dao) {
+    public ArrayList<Admin> readAll(DAOManager dao) {
         ArrayList<Admin> lista = new ArrayList<>();
         String sentencia = "SELECT id, nombre, clave, email FROM Admin"; // Más claro y explícito
 
@@ -40,7 +40,6 @@ public class DAOAdminSQL implements DAOAdmin {
                 throw new RuntimeException("Error al cerrar la conexión", e);
             }
         }
-
         return lista;
     }
 

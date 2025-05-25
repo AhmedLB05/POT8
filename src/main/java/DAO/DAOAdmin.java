@@ -6,7 +6,7 @@ import java.util.ArrayList;
 
 public interface DAOAdmin {
 
-    public ArrayList<Admin> read(DAOManager dao);
+    public ArrayList<Admin> readAll(DAOManager dao);
 
     public boolean insert(DAOManager dao, Admin admin);
 }
