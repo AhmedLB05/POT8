@@ -282,5 +282,4 @@ public class DAOPedidoSQL implements DAOPedido {
         }
         return pedidos;
     }
-    //Recio
 }
