@@ -231,4 +231,12 @@ public class Cliente implements Serializable {
         }
         return false;
     }
+
+    public ArrayList<Pedido> pedidosPersistencia() {
+        return pedidos;
+    }
+
+    public ArrayList<Producto> carroPersistencia() {
+        return carro;
+    }
 }

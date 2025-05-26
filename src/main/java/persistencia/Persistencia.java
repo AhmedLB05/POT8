@@ -267,6 +267,7 @@ public class Persistencia {
 
     }
 
+    //Metodo que guarda el ultimo inicio de sesion del usuario
     private static void ultimoCierreSesionUsuario(int idUsuario) {
         Properties prop = new Properties();
         try {
@@ -312,7 +313,6 @@ public class Persistencia {
             return "";
         }
     }
-
 
     //Metodo que recoge la ruta de persistencia de los clientes desde Properties
     private static String getRutaClientes() {
@@ -362,6 +362,7 @@ public class Persistencia {
         }
     }
 
+    //Metodo que devuelve la ruta de persistencia de los PDF
     public static String getRutaPDF() {
         Properties prop = new Properties();
         try {
@@ -372,6 +373,7 @@ public class Persistencia {
         }
     }
 
+    //Metodo que devuelve la ruta de persistencia de los Excel
     public static String getRutaExcel() {
         Properties prop = new Properties();
         try {
@@ -382,6 +384,7 @@ public class Persistencia {
         }
     }
 
+    //Metodo que devuelve la ruta de persistencia de los backups
     private static String getRutaBackup() {
         Properties prop = new Properties();
         try {
@@ -393,7 +396,7 @@ public class Persistencia {
         }
     }
 
-
+    //Metodo que elimina un trabajador
     public static boolean eliminaTrabajador(Trabajador trabajadorBaja) {
         File rutaTrabajador = new File(getRutaTrabajadores() + "/" + trabajadorBaja.getId() + ".trabajadores");
         if (rutaTrabajador.exists()) {
@@ -406,6 +409,7 @@ public class Persistencia {
         return false;
     }
 
+    //Metodo que devuelve la configuracion del programa
     public static ArrayList<String> configuracionPrograma() {
         ArrayList<String> config = new ArrayList<>();
 
@@ -424,8 +428,9 @@ public class Persistencia {
         return config;
     }
 
+    //Metodo para guardar un backup de todos los datos de la aplicacion
     public static boolean creaBackup(Controlador controlador) {
-        File directorioBackup = new File(getRutaBackup());
+        /*File directorioBackup = new File(getRutaBackup());
         if (!directorioBackup.exists()) directorioBackup.mkdirs();
         try {
             ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(directorioBackup + "\\" + "controller.backup"));
@@ -434,11 +439,56 @@ public class Persistencia {
             return true;
         } catch (IOException e) {
             return false;
+        }*/
+
+        File directorioBackup = new File(getRutaBackup());
+        if (!directorioBackup.exists()) directorioBackup.mkdirs();
+        ArrayList<Cliente> clientes = controlador.getClientes();
+        ArrayList<Trabajador> trabajadores = controlador.getTrabajadores();
+        ArrayList<Admin> admins = controlador.getAdmins();
+        ArrayList<Producto> productos = controlador.getCatalogo();
+
+        try {
+            ObjectOutputStream oos = null;
+            oos = new ObjectOutputStream(new FileOutputStream(directorioBackup + "\\" + "clientesBackup.backup"));
+            oos.writeObject(clientes);
+            oos.close();
+        } catch (IOException e) {
+            return false;
         }
+
+        try {
+            ObjectOutputStream oos = null;
+            oos = new ObjectOutputStream(new FileOutputStream(directorioBackup + "\\" + "trabajadoresBackup.backup"));
+            oos.writeObject(trabajadores);
+            oos.close();
+        } catch (IOException e) {
+            return false;
+        }
+
+        try {
+            ObjectOutputStream oos = null;
+            oos = new ObjectOutputStream(new FileOutputStream(directorioBackup + "\\" + "adminsBackup.backup"));
+            oos.writeObject(admins);
+            oos.close();
+        } catch (IOException e) {
+            return false;
+        }
+
+        try {
+            ObjectOutputStream oos = null;
+            oos = new ObjectOutputStream(new FileOutputStream(directorioBackup + "\\" + "productosBackup.backup"));
+            oos.writeObject(productos);
+            oos.close();
+        } catch (IOException e) {
+            return false;
+        }
+        return true;
     }
 
+    //Metodo para guardar un backup de todos los datos de la aplicacion en una ruta personalizada
     public static boolean creaBackupPersonalizado(String ruta, Controlador controlador) {
-        File directorioBackup = new File(ruta);
+        /*File directorioBackup = new File(ruta);
         if (!directorioBackup.exists()) directorioBackup.mkdirs();
         try {
             ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(directorioBackup + "\\" + "controller.backup"));
@@ -447,10 +497,54 @@ public class Persistencia {
             return true;
         } catch (IOException e) {
             return false;
+        }*/
+
+        File directorioBackup = new File(ruta);
+        if (!directorioBackup.exists()) directorioBackup.mkdirs();
+        ArrayList<Cliente> clientes = controlador.getClientes();
+        ArrayList<Trabajador> trabajadores = controlador.getTrabajadores();
+        ArrayList<Admin> admins = controlador.getAdmins();
+        ArrayList<Producto> productos = controlador.getCatalogo();
+
+        try {
+            ObjectOutputStream oos = null;
+            oos = new ObjectOutputStream(new FileOutputStream(directorioBackup + "\\" + "clientesBackup.backup"));
+            oos.writeObject(clientes);
+            oos.close();
+        } catch (IOException e) {
+            return false;
         }
+
+        try {
+            ObjectOutputStream oos = null;
+            oos = new ObjectOutputStream(new FileOutputStream(directorioBackup + "\\" + "trabajadoresBackup.backup"));
+            oos.writeObject(trabajadores);
+            oos.close();
+        } catch (IOException e) {
+            return false;
+        }
+
+        try {
+            ObjectOutputStream oos = null;
+            oos = new ObjectOutputStream(new FileOutputStream(directorioBackup + "\\" + "adminsBackup.backup"));
+            oos.writeObject(admins);
+            oos.close();
+        } catch (IOException e) {
+            return false;
+        }
+
+        try {
+            ObjectOutputStream oos = null;
+            oos = new ObjectOutputStream(new FileOutputStream(directorioBackup + "\\" + "productosBackup.backup"));
+            oos.writeObject(productos);
+            oos.close();
+        } catch (IOException e) {
+            return false;
+        }
+        return true;
     }
 
-    public static Controlador recuperaBackup() {
+    /*public static Controlador recuperaBackup() {
         Controlador backup;
         File directorioBackup = new File(getRutaBackup());
         if (!directorioBackup.exists()) return null;
@@ -463,9 +557,9 @@ public class Persistencia {
             return null;
         }
         return backup;
-    }
+    }*/
 
-    public static Controlador recuperaBackupPersonalizado(String ruta) {
+    /*public static Controlador recuperaBackupPersonalizado(String ruta) {
         Controlador backup;
         File directorioBackup = new File(ruta);
         if (!directorioBackup.exists()) return null;
@@ -478,7 +572,7 @@ public class Persistencia {
             return null;
         }
         return backup;
-    }
+    }*/
 
     public static void guardaResumenPedido(Pedido pedidoTemp) {
         File directorioDocumentos = new File(getRutaPDF());
@@ -647,4 +741,123 @@ public class Persistencia {
     }
 
 
+    public static ArrayList<Cliente> recuperaClientesBackup() {
+        ArrayList<Cliente> clientesBackup = new ArrayList<>();
+        File directorioBackup = new File(getRutaBackup());
+        if (!directorioBackup.exists()) return clientesBackup;
+
+        try {
+            ObjectInputStream ois = new ObjectInputStream(new FileInputStream(directorioBackup + "\\" + "clientesBackup.backup"));
+            clientesBackup = (ArrayList<Cliente>) ois.readObject();
+            ois.close();
+            return clientesBackup;
+        } catch (IOException | ClassNotFoundException e) {
+            return null;
+        }
+    }
+
+    public static ArrayList<Trabajador> recuperaTrabajadoresBackup() {
+        ArrayList<Trabajador> trabajadoresBackup = new ArrayList<>();
+        File directorioBackup = new File(getRutaBackup());
+        if (!directorioBackup.exists()) return trabajadoresBackup;
+        ObjectInputStream ois = null;
+        try {
+            ois = new ObjectInputStream(new FileInputStream(directorioBackup + "\\" + "trabajadoresBackup.backup"));
+            trabajadoresBackup = (ArrayList<Trabajador>) ois.readObject();
+            ois.close();
+            return trabajadoresBackup;
+        } catch (IOException | ClassNotFoundException e) {
+            return null;
+        }
+    }
+
+    public static ArrayList<Admin> recuperaAdminsBackup() {
+        ArrayList<Admin> adminsBackup = new ArrayList<>();
+        File directorioBackup = new File(getRutaBackup());
+        if (!directorioBackup.exists()) return adminsBackup;
+        ObjectInputStream ois = null;
+        try {
+            ois = new ObjectInputStream(new FileInputStream(directorioBackup + "\\" + "adminsBackup.backup"));
+            adminsBackup = (ArrayList<Admin>) ois.readObject();
+            ois.close();
+            return adminsBackup;
+        } catch (IOException | ClassNotFoundException e) {
+            return null;
+        }
+    }
+
+    public static ArrayList<Producto> recuperaProductosBackup() {
+        ArrayList<Producto> productosBackup = new ArrayList<>();
+        File directorioBackup = new File(getRutaBackup());
+        if (!directorioBackup.exists()) return productosBackup;
+        ObjectInputStream ois = null;
+        try {
+            ois = new ObjectInputStream(new FileInputStream(directorioBackup + "\\" + "productosBackup.backup"));
+            productosBackup = (ArrayList<Producto>) ois.readObject();
+            ois.close();
+            return productosBackup;
+        } catch (IOException | ClassNotFoundException e) {
+            return null;
+        }
+    }
+
+    public static ArrayList<Cliente> recuperaClientesBackupPersonlizado(String ruta) {
+        ArrayList<Cliente> clientesBackup = new ArrayList<>();
+        File directorioBackup = new File(ruta);
+        if (!directorioBackup.exists()) directorioBackup.mkdirs();
+        ObjectInputStream ois = null;
+        try {
+            ois = new ObjectInputStream(new FileInputStream(directorioBackup + "\\" + "clientesBackup.backup"));
+            clientesBackup = (ArrayList<Cliente>) ois.readObject();
+            ois.close();
+            return clientesBackup;
+        } catch (IOException | ClassNotFoundException e) {
+            return null;
+        }
+    }
+
+    public static ArrayList<Trabajador> recuperaTrabajadoresBackupPersonalizado(String ruta) {
+        ArrayList<Trabajador> trabajadoresBackup = new ArrayList<>();
+        File directorioBackup = new File(ruta);
+        if (!directorioBackup.exists()) directorioBackup.mkdirs();
+        ObjectInputStream ois = null;
+        try {
+            ois = new ObjectInputStream(new FileInputStream(directorioBackup + "\\" + "trabajadoresBackup.backup"));
+            trabajadoresBackup = (ArrayList<Trabajador>) ois.readObject();
+            ois.close();
+            return trabajadoresBackup;
+        } catch (IOException | ClassNotFoundException e) {
+            return null;
+        }
+    }
+
+    public static ArrayList<Admin> recuperaAdminsBackupPersonalizado(String ruta) {
+        ArrayList<Admin> adminsBackup = new ArrayList<>();
+        File directorioBackup = new File(ruta);
+        if (!directorioBackup.exists()) directorioBackup.mkdirs();
+        ObjectInputStream ois = null;
+        try {
+            ois = new ObjectInputStream(new FileInputStream(directorioBackup + "\\" + "adminsBackup.backup"));
+            adminsBackup = (ArrayList<Admin>) ois.readObject();
+            ois.close();
+            return adminsBackup;
+        } catch (IOException | ClassNotFoundException e) {
+            return null;
+        }
+    }
+
+    public static ArrayList<Producto> recuperaProductosBackupPersonalizado(String ruta) {
+        ArrayList<Producto> productosBackup = new ArrayList<>();
+        File directorioBackup = new File(ruta);
+        if (!directorioBackup.exists()) directorioBackup.mkdirs();
+        ObjectInputStream ois = null;
+        try {
+            ois = new ObjectInputStream(new FileInputStream(directorioBackup + "\\" + "productosBackup.backup"));
+            productosBackup = (ArrayList<Producto>) ois.readObject();
+            ois.close();
+            return productosBackup;
+        } catch (IOException | ClassNotFoundException e) {
+            return null;
+        }
+    }
 }

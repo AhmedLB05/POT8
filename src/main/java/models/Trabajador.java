@@ -165,4 +165,9 @@ public class Trabajador implements Serializable {
         resultado += asteriscosClave + "\n";
         return resultado;
     }
+
+    public ArrayList<Pedido> pedidosAsignadosPersistencia() {
+        return pedidosAsignados;
+    }
+
 }

@@ -62,20 +62,16 @@ public class Controlador implements Serializable {
     }
 
     public void iniciaDatosCliente() {
-        Cliente c1 = new Cliente(123456789, "ahmedlb26205@gmail.com", "123", "Ahmed",
-                "Torredelcampo", "Jaén", "Federico Garcia Lorca", 631788372);
-        Cliente c2 = new Cliente(987654321, "marcos.lara.0610@fernando3martos.com", "123", "Marcos",
-                "Martos", "Jaén", "Calle Ramon Garay", 672929324);
+        Cliente c1 = new Cliente(123456789, "ahmedlb26205@gmail.com", "123", "Ahmed", "Torredelcampo", "Jaén", "Federico Garcia Lorca", 631788372);
+        Cliente c2 = new Cliente(987654321, "marcos.lara.0610@fernando3martos.com", "123", "Marcos", "Martos", "Jaén", "Calle Ramon Garay", 672929324);
         daoClienteSQL.insert(dao, c1);
         daoClienteSQL.insert(dao, c2);
         //Utils.mensajeGuardadoPersistencia(Persistencia.guardaClientesPersistencia(clientes));
     }
 
     public void iniciaDatosTrabajadores() {
-        Trabajador t1 = new Trabajador(123456789, "Carlos", "123",
-                "ahmed.lhaouchi.2602@fernando3martos.com", 672839234);
-        Trabajador t2 = new Trabajador(987654321, "Juan", "123", "marcoscano2005@gmail.com",
-                672812344);
+        Trabajador t1 = new Trabajador(123456789, "Carlos", "123", "ahmed.lhaouchi.2602@fernando3martos.com", 672839234);
+        Trabajador t2 = new Trabajador(987654321, "Juan", "123", "marcoscano2005@gmail.com", 672812344);
         daoTrabajadorSQL.insert(dao, t1);
         daoTrabajadorSQL.insert(dao, t2);
         //Utils.mensajeGuardadoPersistencia(Persistencia.guardaTrabajadoresPersistencia(trabajadores));
@@ -281,10 +277,8 @@ public class Controlador implements Serializable {
         String terminoLower = termino.toLowerCase();
 
         for (Producto p : getCatalogo()) {
-            if ((p.getDescripcion().toLowerCase().contains(terminoLower) ||
-                    p.getMarca().toLowerCase().contains(terminoLower) ||
-                    p.getModelo().toLowerCase().contains(terminoLower)) &&
-                    !productosCoincideTermino.contains(p)) productosCoincideTermino.add(p);
+            if ((p.getDescripcion().toLowerCase().contains(terminoLower) || p.getMarca().toLowerCase().contains(terminoLower) || p.getModelo().toLowerCase().contains(terminoLower)) && !productosCoincideTermino.contains(p))
+                productosCoincideTermino.add(p);
         }
         return productosCoincideTermino;
     }
@@ -418,7 +412,7 @@ public class Controlador implements Serializable {
         if (flag) {
             Cliente cliente = sacaClienteDeUnPedido(pedidoTemp.getId());
             if (cliente != null) {
-                //Persistencia.guardaNuevoPedido(cliente.getId(), trabajadorTemp.getId());
+                Persistencia.guardaNuevoPedido(cliente.getId(), trabajadorTemp.getId());
                 daoPedidoSQL.updateTrabajador(dao, pedidoTemp, trabajadorTemp);
             }
             //Persistencia.guardaTrabajadoresPersistencia(trabajadores);
@@ -700,25 +694,139 @@ public class Controlador implements Serializable {
         return Persistencia.creaBackupPersonalizado(ruta, this);
     }
 
-    /*public boolean recuperaBackup() {
-        Controlador backupControlador = Persistencia.recuperaBackup();
-        if (backupControlador == null) return false;
-        clientes = backupControlador.clientes;
-        trabajadores = backupControlador.trabajadores;
-        admins = backupControlador.admins;
-        catalogo = backupControlador.catalogo;
+    public boolean recuperaBackup() {
+        ArrayList<Cliente> clientesBackup = Persistencia.recuperaClientesBackup();
+        ArrayList<Trabajador> trabajadoresBackup = Persistencia.recuperaTrabajadoresBackup();
+        ArrayList<Admin> adminsBackup = Persistencia.recuperaAdminsBackup();
+        ArrayList<Producto> catalogoBackup = Persistencia.recuperaProductosBackup();
+
+        if (clientesBackup == null || trabajadoresBackup == null || adminsBackup == null || catalogoBackup == null)
+            return false;
+
+        //Eliminamos los clientes de la base de datos
+        for (Cliente c : getClientes()) {
+            daoClienteSQL.delete(dao, c);
+        }
+        //Eliminamos los trabajadores de la base de datos
+        for (Trabajador t : getTrabajadores()) {
+            daoTrabajadorSQL.delete(dao, t);
+        }
+        //Eliminamos los admins de la base de datos
+        for (Admin a : getAdmins()) {
+            daoAdminSQL.delete(dao, a);
+        }
+        //Eliminamos los productos de la base de datos
+        for (Producto p : getCatalogo()) {
+            daoProductoSQL.delete(dao, p);
+        }
+
+        //Recuperamos los productos del backup
+        for (Producto p : catalogoBackup) {
+            daoProductoSQL.insert(dao, p);
+        }
+
+        //Recuperamos los admins del backup
+        for (Admin a : adminsBackup) {
+            daoAdminSQL.insert(dao, a);
+        }
+
+        //Recuperamos los trabajadores del backup
+        for (Trabajador t : trabajadoresBackup) {
+            daoTrabajadorSQL.insert(dao, t);
+        }
+
+        //Recuperamos los clientes del backup
+        for (Cliente c : clientesBackup) {
+            daoClienteSQL.insert(dao, c);
+            if (!c.pedidosPersistencia().isEmpty()) {
+                for (Pedido p : c.pedidosPersistencia()) {
+                    daoPedidoSQL.insert(dao, p, c);
+                    daoPedidoProductosSQL.insert(dao, p);
+                }
+            }
+            if (!c.carroPersistencia().isEmpty()) {
+                for (Producto p : c.carroPersistencia()) {
+                    daoCarroSQL.insert(dao, c, p);
+                }
+            }
+        }
+
+        for (Trabajador t : trabajadoresBackup) {
+            if (!t.pedidosAsignadosPersistencia().isEmpty()) {
+                for (Pedido p : t.pedidosAsignadosPersistencia()) {
+                    daoPedidoSQL.updateTrabajador(dao, p, t);
+                }
+            }
+        }
         return true;
     }
 
     public boolean recuperaBackupPersonalizado(String ruta) {
-        Controlador backupControlador = Persistencia.recuperaBackupPersonalizado(ruta);
-        if (backupControlador == null) return false;
-        clientes = backupControlador.clientes;
-        trabajadores = backupControlador.trabajadores;
-        admins = backupControlador.admins;
-        catalogo = backupControlador.catalogo;
+        ArrayList<Cliente> clientesBackup = Persistencia.recuperaClientesBackupPersonlizado(ruta);
+        ArrayList<Trabajador> trabajadoresBackup = Persistencia.recuperaTrabajadoresBackupPersonalizado(ruta);
+        ArrayList<Admin> adminsBackup = Persistencia.recuperaAdminsBackupPersonalizado(ruta);
+        ArrayList<Producto> catalogoBackup = Persistencia.recuperaProductosBackupPersonalizado(ruta);
+
+        if (clientesBackup == null || trabajadoresBackup == null || adminsBackup == null || catalogoBackup == null)
+            return false;
+
+        //Eliminamos los clientes de la base de datos
+        for (Cliente c : getClientes()) {
+            daoClienteSQL.delete(dao, c);
+        }
+        //Eliminamos los trabajadores de la base de datos
+        for (Trabajador t : getTrabajadores()) {
+            daoTrabajadorSQL.delete(dao, t);
+        }
+        //Eliminamos los admins de la base de datos
+        for (Admin a : getAdmins()) {
+            daoAdminSQL.delete(dao, a);
+        }
+        //Eliminamos los productos de la base de datos
+        for (Producto p : getCatalogo()) {
+            daoProductoSQL.delete(dao, p);
+        }
+
+        //Recuperamos los productos del backup
+        for (Producto p : catalogoBackup) {
+            daoProductoSQL.insert(dao, p);
+        }
+
+        //Recuperamos los admins del backup
+        for (Admin a : adminsBackup) {
+            daoAdminSQL.insert(dao, a);
+        }
+
+        //Recuperamos los trabajadores del backup
+        for (Trabajador t : trabajadoresBackup) {
+            daoTrabajadorSQL.insert(dao, t);
+        }
+
+        //Recuperamos los clientes del backup
+        for (Cliente c : clientesBackup) {
+            daoClienteSQL.insert(dao, c);
+            if (!c.pedidosPersistencia().isEmpty()) {
+                for (Pedido p : c.pedidosPersistencia()) {
+                    daoPedidoSQL.insert(dao, p, c);
+                    daoPedidoProductosSQL.insert(dao, p);
+                }
+            }
+            if (!c.carroPersistencia().isEmpty()) {
+                for (Producto p : c.carroPersistencia()) {
+                    daoCarroSQL.insert(dao, c, p);
+                }
+            }
+        }
+
+        for (Trabajador t : trabajadoresBackup) {
+            if (!t.pedidosAsignadosPersistencia().isEmpty()) {
+                for (Pedido p : t.pedidosAsignadosPersistencia()) {
+                    daoPedidoSQL.updateTrabajador(dao, p, t);
+                }
+            }
+        }
         return true;
-    }*/
+    }
 
     public void adjuntaCorreosExcel(String email) {
         ArrayList<Pedido> listado = getTodosPedidos();

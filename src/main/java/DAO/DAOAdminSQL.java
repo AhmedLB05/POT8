@@ -5,6 +5,7 @@ import models.Admin;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 
 public class DAOAdminSQL implements DAOAdmin {
@@ -69,6 +70,20 @@ public class DAOAdminSQL implements DAOAdmin {
             } catch (SQLException e) {
                 return false;
             }
+        }
+    }
+
+    @Override
+    public boolean delete(DAOManager dao, Admin a) {
+        try {
+            dao.open();
+            String sentencia = "DELETE FROM Admin WHERE `Admin`.`id` = '" + a.getId() + "'";
+            Statement stmt = dao.getConn().createStatement();
+            stmt.executeUpdate(sentencia);
+            dao.close();
+            return true;
+        } catch (Exception e) {
+            return false;
         }
     }
 }

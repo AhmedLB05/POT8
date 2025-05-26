@@ -544,13 +544,13 @@ public class Main {
         } while (!respuesta.equalsIgnoreCase("s") && !respuesta.equalsIgnoreCase("n") && !respuesta.equals("-1"));
         if (respuesta.equals("-1")) return;
         if (respuesta.equalsIgnoreCase("s")) {
-            /*if (controlador.recuperaBackup()) {
+            if (controlador.recuperaBackup()) {
                 System.out.println(" - COPIA DE SEGURIDAD RECUPERADA CON EXITO");
                 controlador.guardaClientes();
                 controlador.guardaTrabajadores();
                 controlador.guardaAdmin();
                 controlador.guardaCatalogo();
-            } else System.out.println(" * ERROR NO SE HA PODIDO RECUPERAR LA COPIA DE SEGURIDAD");*/
+            } else System.out.println(" * ERROR NO SE HA PODIDO RECUPERAR LA COPIA DE SEGURIDAD");
         }
         if (respuesta.equalsIgnoreCase("n")) {
             String ruta;
@@ -564,13 +564,13 @@ public class Main {
             Utils.pulsaParaContinuar();
             System.out.print("Introduzca la ruta desde donde desea recuperar la copia de seguridad: ");
             ruta = S.nextLine();
-            /*if (controlador.recuperaBackupPersonalizado(ruta)) {
+            if (controlador.recuperaBackupPersonalizado(ruta)) {
                 System.out.println(" - COPIA DE SEGURIDAD RECUPERADA CON EXITO");
                 controlador.guardaClientes();
                 controlador.guardaTrabajadores();
                 controlador.guardaAdmin();
                 controlador.guardaCatalogo();
-            } else System.out.println(" * ERROR NO SE HA PODIDO RECUPERAR LA COPIA DE SEGURIDAD");*/
+            } else System.out.println(" * ERROR NO SE HA PODIDO RECUPERAR LA COPIA DE SEGURIDAD");
         }
 
     }
