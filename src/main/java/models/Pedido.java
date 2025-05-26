@@ -19,7 +19,17 @@ public class Pedido implements Serializable {
         this.id = id;
         this.fechaPedido = fechaPedido;
         this.fechaEntregaEstimada = fechaPedido.plusDays(5);
-        this.estado = 0;
+        this.estado = 1;
+        this.comentario = comentario;
+        this.productos = productos;
+    }
+
+    //Constructor DAO
+    public Pedido(int id, LocalDate fechaPedido, LocalDate fechaEntregaEstimada, int estado, String comentario, ArrayList<Producto> productos) {
+        this.id = id;
+        this.fechaPedido = fechaPedido;
+        this.fechaEntregaEstimada = fechaEntregaEstimada;
+        this.estado = estado;
         this.comentario = comentario;
         this.productos = productos;
     }

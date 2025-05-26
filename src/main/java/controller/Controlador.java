@@ -10,7 +10,6 @@ import persistencia.Persistencia;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Iterator;
 
 public class Controlador implements Serializable {
 
@@ -315,10 +314,7 @@ public class Controlador implements Serializable {
 
     //Metodo que devuelve todos los pedidos existentes
     public ArrayList<Pedido> getTodosPedidos() {
-        ArrayList<Pedido> todosPedidos = new ArrayList<>();
-        for (Cliente c : getClientes()) {
-            if (!c.getPedidos().isEmpty()) todosPedidos.addAll(c.getPedidos());
-        }
+        ArrayList<Pedido> todosPedidos = daoPedidoSQL.readAll(dao);
         return todosPedidos;
     }
 
@@ -649,7 +645,8 @@ public class Controlador implements Serializable {
         if (clienteTemp == null) return false;
         if (pedidoTemp == null) return false;
 
-        return pedidoTemp.cambiaEstado(4);
+        pedidoTemp.cambiaEstado(4);
+        return daoPedidoSQL.update(dao, pedidoTemp);
     }
 
     public boolean guardaClientes() {
@@ -670,7 +667,7 @@ public class Controlador implements Serializable {
 
     //Metodo porque cuando solo quedaba un trabajador y se eliminaba daba una excepcion
     public boolean bajaTrabajador(Trabajador trabajadorBaja) {
-        Iterator<Trabajador> it = getTrabajadores().iterator();
+        /*Iterator<Trabajador> it = getTrabajadores().iterator();
         while (it.hasNext()) {
             Trabajador t = it.next();
             if (t.equals(trabajadorBaja)) {
@@ -678,6 +675,13 @@ public class Controlador implements Serializable {
                 daoTrabajadorSQL.delete(dao, t);
                 it.remove();
                 return true;
+            }
+        }
+        return false;*/
+        for (Trabajador t : getTrabajadores()) {
+            if (t.getId() == trabajadorBaja.getId()) {
+                Persistencia.eliminaTrabajador(t);
+                return daoTrabajadorSQL.delete(dao, t);
             }
         }
         return false;
@@ -726,7 +730,6 @@ public class Controlador implements Serializable {
         for (Pedido pedido : getTodosPedidos()) {
             if (p.getIdPedido() == pedido.getId()) {
                 pedido.setComentario(comentarioNuevo);
-                daoPedidoSQL.update(dao, pedido);
                 Persistencia.guardaActualizaPedido(pedido);
             }
         }
@@ -741,4 +744,21 @@ public class Controlador implements Serializable {
         }
         return null;
     }
+
+    public void actualizaProductoDAO(Producto p) {
+        daoProductoSQL.update(dao, p);
+    }
+
+    public void actualizaPedidoDAO(PedidoClienteDataClass p, String comentarioNuevo) {
+        for (Pedido pedido : getTodosPedidos()) {
+            if (pedido.getId() == p.getIdPedido()) {
+                pedido.setComentario(comentarioNuevo);
+                daoPedidoSQL.update(dao, pedido);
+            }
+        }
+    }
+
+   /* public void actualizaComentarioDAO(Pedido pedidoActualizado) {
+        daoPedidoSQL.update(dao, pedidoActualizado);
+    }*/
 }

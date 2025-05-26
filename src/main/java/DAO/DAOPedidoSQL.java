@@ -26,6 +26,8 @@ public class DAOPedidoSQL implements DAOPedido, Serializable {
                     pedidos.add(new Pedido(
                             rs.getInt("id"),
                             rs.getDate("fechaPedido").toLocalDate(),
+                            rs.getDate("fechaEntregaEstimada").toLocalDate(),
+                            rs.getInt("estado"),
                             rs.getString("comentario"),
                             daoPedidoProductos.readAll(dao, rs.getInt("id"))
                     ));
@@ -90,16 +92,19 @@ public class DAOPedidoSQL implements DAOPedido, Serializable {
     @Override
     public ArrayList<Pedido> readPedidosByIdCliente(DAOManager dao, Cliente cliente) {
         ArrayList<Pedido> pedidos = new ArrayList<>();
-        String sentencia = "SELECT * FROM Pedido WHERE `idCliente` = '" + cliente.getId() + "'";
+        String sentencia = "SELECT * FROM Pedido WHERE `idCliente` = ?";
 
         try {
             dao.open();
             PreparedStatement ps = dao.getConn().prepareStatement(sentencia);
+            ps.setInt(1, cliente.getId());
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     pedidos.add(new Pedido(
                             rs.getInt("id"),
                             rs.getDate("fechaPedido").toLocalDate(),
+                            rs.getDate("fechaEntregaEstimada").toLocalDate(),
+                            rs.getInt("estado"),
                             rs.getString("comentario"),
                             daoPedidoProductos.readAll(dao, rs.getInt("id"))
                     ));
@@ -109,22 +114,27 @@ public class DAOPedidoSQL implements DAOPedido, Serializable {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+
         return pedidos;
     }
 
     @Override
     public ArrayList<Pedido> readPedidosByIdTrabajador(DAOManager dao, Trabajador trabajador) {
         ArrayList<Pedido> pedidos = new ArrayList<>();
-        String sentencia = "SELECT * FROM Pedido WHERE `idTrabajador` = '" + trabajador.getId() + "'";
+        String sentencia = "SELECT * FROM Pedido WHERE `idTrabajador` = ?";
 
         try {
             dao.open();
             PreparedStatement ps = dao.getConn().prepareStatement(sentencia);
+            ps.setInt(1, trabajador.getId());
+
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     pedidos.add(new Pedido(
                             rs.getInt("id"),
                             rs.getDate("fechaPedido").toLocalDate(),
+                            rs.getDate("fechaEntregaEstimada").toLocalDate(),
+                            rs.getInt("estado"),
                             rs.getString("comentario"),
                             daoPedidoProductos.readAll(dao, rs.getInt("id"))
                     ));
@@ -134,6 +144,7 @@ public class DAOPedidoSQL implements DAOPedido, Serializable {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+
         return pedidos;
     }
 }

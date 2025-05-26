@@ -336,7 +336,8 @@ public class Main {
             do {
                 System.out.println();
                 System.out.println(" - Bienvenido " + cliente.getNombre() + ". Tiene " + controlador.getTotalPedidosPendientesEntregaCliente(cliente) + " pedido/s pendiente/s de entrega.");
-                System.out.println(" - Usted inició sesión por última vez el " + controlador.getUltimoInicioSesion(cliente.getId()));
+                if (controlador.getUltimoInicioSesion(cliente.getId()) != null)
+                    System.out.println(" - Usted inició sesión por última vez el " + controlador.getUltimoInicioSesion(cliente.getId()));
                 System.out.println("""
                         1. Consultar el catálogo de productos
                         2. Realizar un pedido
@@ -364,7 +365,8 @@ public class Main {
             int opTrabajador;
             do {
                 System.out.println("\n\n - Bienvenido trabajador " + trabajadorRegistrado.getNombre() + ". Tiene " + trabajadorRegistrado.numPedidosPendientes() + " pedido/s pendiente/s.");
-                System.out.println(" - Usted inició sesión por última vez el " + controlador.getUltimoInicioSesion(trabajadorRegistrado.getId()));
+                if (controlador.getUltimoInicioSesion(trabajadorRegistrado.getId()) != null)
+                    System.out.println(" - Usted inició sesión por última vez el " + controlador.getUltimoInicioSesion(trabajadorRegistrado.getId()));
                 System.out.println("""
                         1. Consultar los pedidos que tengo asignados
                         2. Modificar el estado de un pedido
@@ -395,7 +397,8 @@ public class Main {
             }
             int opAdmin;
             do {
-                System.out.println("\n - Usted inició sesión por última vez el " + controlador.getUltimoInicioSesion(admin.getId()));
+                if (controlador.getUltimoInicioSesion(admin.getId()) != null)
+                    System.out.println("\n - Usted inició sesión por última vez el " + controlador.getUltimoInicioSesion(admin.getId()));
                 pintaEstadisticasAdmin(controlador);
                 System.out.print("""
                          1. - Ver todo el catálogo
@@ -723,8 +726,9 @@ public class Main {
 
                     if (opcion.equalsIgnoreCase("si")) {
                         if (t.numPedidosPendientes() == 0) {
-                            controlador.bajaTrabajador(t);
-                            System.out.println(" - Trabajador dado de baja correctamente");
+                            if (controlador.bajaTrabajador(t))
+                                System.out.println(" - Trabajador dado de baja correctamente");
+                            else System.out.println(" * ERROR AL DAR DE BAJA AL TRABAJADOR");
                             ArrayList<Pedido> pedidosSinAsignar = controlador.pedidosSinTrabajador();
                             Trabajador candidato = controlador.buscaTrabajadorCandidatoParaAsignar();
 
@@ -826,21 +830,17 @@ public class Main {
                 int contEntregados = 0;
                 System.out.println("\n╔════════════════════════════════════════════╗");
                 System.out.println("""
-                                         ┏┓   ┓• ┓                   ┓
-                                         ┃┃┏┓┏┫┓┏┫┏┓┏  ┏┓┏┓╋┏┓┏┓┏┓┏┓┏┫┏┓┏
-                                         ┣┛┗ ┗┻┗┗┻┗┛┛  ┗ ┛┗┗┛ ┗ ┗┫┗┻┗┻┗┛┛
-                                                                    ┛
+                                     ┏┓   ┓• ┓                   ┓
+                                     ┃┃┏┓┏┫┓┏┫┏┓┏  ┏┓┏┓╋┏┓┏┓┏┓┏┓┏┫┏┓┏
+                                     ┣┛┗ ┗┻┗┗┻┗┛┛  ┗ ┛┗┗┛ ┗ ┗┫┗┻┗┻┗┛┛
+                                                             ┛
                         """);
                 System.out.println("╚════════════════════════════════════════════╝");
-                for (Pedido p : controlador.getTodosPedidos()) {
+                ArrayList<Pedido> pedidos = controlador.getTodosPedidos();
+                for (Pedido p : pedidos) {
                     if (p.getEstado() == 3) {
                         System.out.println(p);
                         contEntregados++;
-                    }
-                    try {
-                        Thread.sleep(500);
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
                     }
                 }
                 if (contEntregados != 0) Utils.pulsaParaContinuar();
@@ -849,13 +849,14 @@ public class Main {
                 int contCancelados = 0;
                 System.out.println("\n╔════════════════════════════════════════════╗");
                 System.out.println("""
-                                          ┏┓   ┓• ┓             ┓   ┓  \s
-                                          ┃┃┏┓┏┫┓┏┫┏┓┏  ┏┏┓┏┓┏┏┓┃┏┓┏┫┏┓┏
-                                          ┣┛┗ ┗┻┗┗┻┗┛┛  ┗┗┻┛┗┗┗ ┗┗┻┗┻┗┛┛
+                                      ┏┓   ┓• ┓             ┓   ┓  \s
+                                      ┃┃┏┓┏┫┓┏┫┏┓┏  ┏┏┓┏┓┏┏┓┃┏┓┏┫┏┓┏
+                                      ┣┛┗ ┗┻┗┗┻┗┛┛  ┗┗┻┛┗┗┗ ┗┗┻┗┻┗┛┛
                                                                          \s
                         """);
                 System.out.println("╚════════════════════════════════════════════╝");
-                for (Pedido p : controlador.getTodosPedidos()) {
+                ArrayList<Pedido> pedidos = controlador.getTodosPedidos();
+                for (Pedido p : pedidos) {
                     if (p.getEstado() == 4) {
                         System.out.println(p);
                         contCancelados++;
@@ -872,14 +873,15 @@ public class Main {
                 int contPendientes = 0;
                 System.out.println("\n╔════════════════════════════════════════════╗");
                 System.out.println("""
-                                          ┏┓   ┓• ┓            ┓•       \s
-                                          ┃┃┏┓┏┫┓┏┫┏┓┏  ┏┓┏┓┏┓┏┫┓┏┓┏┓╋┏┓┏
-                                          ┣┛┗ ┗┻┗┗┻┗┛┛  ┣┛┗ ┛┗┗┻┗┗ ┛┗┗┗ ┛
-                                                          ┛               \s
+                                      ┏┓   ┓• ┓            ┓•       \s
+                                      ┃┃┏┓┏┫┓┏┫┏┓┏  ┏┓┏┓┏┓┏┫┓┏┓┏┓╋┏┓┏
+                                      ┣┛┗ ┗┻┗┗┻┗┛┛  ┣┛┗ ┛┗┗┻┗┗ ┛┗┗┗ ┛
+                                                    ┛               \s
                         """);
                 System.out.println("╚════════════════════════════════════════════╝");
-                for (Pedido p : controlador.getTodosPedidos()) {
-                    if (p.getEstado() == 0 || p.getEstado() == 1 || p.getEstado() == 2) {
+                ArrayList<Pedido> pedidos = controlador.getTodosPedidos();
+                for (Pedido p : pedidos) {
+                    if (p.getEstado() == 1 || p.getEstado() == 2 || p.getEstado() == 0) {
                         System.out.println(p);
                         contPendientes++;
                     }
@@ -889,7 +891,7 @@ public class Main {
                         throw new RuntimeException(e);
                     }
                 }
-                if (contPendientes != 0) Utils.pulsaParaContinuar();
+                Utils.pulsaParaContinuar();
             }
 
         }
@@ -973,17 +975,12 @@ public class Main {
             System.out.println(" ***** PEDIDO " + cont + " ***** \n");
             System.out.println(pedidoSeleccionado);
             pedidosCopia.add(pedidoSeleccionado);
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
             cont++;
             Utils.pulsaParaContinuar();
         }
         do {
             try {
-                System.out.print("Introduce el pedido: ");
+                System.out.print("\nIntroduce el pedido: ");
                 numPedido = Integer.parseInt(S.nextLine());
                 numPedido--;
                 break;
@@ -998,7 +995,7 @@ public class Main {
         System.out.print("\nIntroduzca el comentario a añadir: ");
         String comentarioNuevo = S.nextLine();
         p.setComentario(comentarioNuevo);
-
+        controlador.actualizaPedidoDAO(p, comentarioNuevo);
         Cliente c = null;
         PedidoClienteDataClass pedidoCambiado = null;
 
@@ -1034,11 +1031,8 @@ public class Main {
                 System.out.println(" ***** PEDIDO " + cont + " ***** \n");
                 System.out.println(pedidoSeleccionado);
                 pedidosCopia.add(pedidoSeleccionado);
-                try {
-                    Thread.sleep(500);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
+                cont++;
+                Utils.pulsaParaContinuar();
             }
             do {
                 try {
@@ -1178,18 +1172,21 @@ public class Main {
                     String marca = S.nextLine();
                     p.setMarca(marca);
                     controlador.guardaCatalogo();
+                    controlador.actualizaProductoDAO(p);
                 }
                 if (op == 1 || op == 3) {
                     System.out.print("Introduzca nuevo modelo del producto: ");
                     String modelo = S.nextLine();
                     p.setModelo(modelo);
                     controlador.guardaCatalogo();
+                    controlador.actualizaProductoDAO(p);
                 }
                 if (op == 1 || op == 4) {
                     System.out.print("Introduzca nueva descripción del producto: ");
                     String descripcion = S.nextLine();
                     p.setDescripcion(descripcion);
                     controlador.guardaCatalogo();
+                    controlador.actualizaProductoDAO(p);
                 }
                 if (op == 1 || op == 5) {
                     float precio;
@@ -1206,6 +1203,7 @@ public class Main {
                     else {
                         p.setPrecio(precio);
                         controlador.guardaCatalogo();
+                        controlador.actualizaProductoDAO(p);
                     }
                 }
                 if (op == 6) Utils.mensajeCierraPrograma();
@@ -1393,11 +1391,6 @@ public class Main {
             System.out.println(" ***** PEDIDO " + cont + " ***** \n");
             System.out.println(pedidoSeleccionado);
             pedidosCopia.add(pedidoSeleccionado);
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
         }
         int numPedido;
         do {
@@ -1421,6 +1414,9 @@ public class Main {
         for (Pedido pedidoBuscado : controlador.getTodosPedidos()) {
             if (pedidoBuscado.getId() == p.getIdPedido()) pedidoActualizado = pedidoBuscado;
         }
+        System.out.println(pedidoActualizado);
+        System.out.println("-----------");
+        controlador.actualizaPedidoDAO(p, comentarioNuevo);
         Persistencia.guardaActualizaPedido(pedidoActualizado);
         Cliente c = null;
         PedidoClienteDataClass pedidoCambiado = null;
@@ -1632,8 +1628,14 @@ public class Main {
 
             if (temp == null) System.out.println(" * ERROR NINGUN PEDIDO CANCELADO");
             else {
-                System.out.println("¿Deseas cancelar el pedido? (SI/NO)");
-                String cancelaPedido = S.nextLine();
+                String cancelaPedido;
+                do {
+                    System.out.print("¿Deseas cancelar el pedido? (SI/NO): ");
+                    cancelaPedido = S.nextLine();
+                    if (!cancelaPedido.equalsIgnoreCase("si") && !cancelaPedido.equalsIgnoreCase("no"))
+                        System.out.println(" * ERROR RESPUESTA NO PERMITIDA");
+                } while (!cancelaPedido.equalsIgnoreCase("si") && !cancelaPedido.equalsIgnoreCase("no"));
+
 
                 if (cancelaPedido.equalsIgnoreCase("si")) {
                     if (controlador.cancelaPedidoCliente(cliente.getId(), temp.getId())) {
