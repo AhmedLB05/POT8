@@ -14,14 +14,14 @@ import java.util.ArrayList;
 public class Controlador implements Serializable {
 
     //Atributos
-    private DAOManager dao;
-    private DAOAdminSQL daoAdminSQL;
-    private DAOCarroSQL daoCarroSQL;
-    private DAOClienteSQL daoClienteSQL;
-    private DAOPedidoProductosSQL daoPedidoProductosSQL;
-    private DAOPedidoSQL daoPedidoSQL;
-    private DAOProductoSQL daoProductoSQL;
-    private DAOTrabajadorSQL daoTrabajadorSQL;
+    private final DAOManager dao;
+    private final DAOAdminSQL daoAdminSQL;
+    private final DAOCarroSQL daoCarroSQL;
+    private final DAOClienteSQL daoClienteSQL;
+    private final DAOPedidoProductosSQL daoPedidoProductosSQL;
+    private final DAOPedidoSQL daoPedidoSQL;
+    private final DAOProductoSQL daoProductoSQL;
+    private final DAOTrabajadorSQL daoTrabajadorSQL;
 
     //Constructor
     public Controlador() {

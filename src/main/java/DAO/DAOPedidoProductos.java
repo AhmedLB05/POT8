@@ -7,7 +7,7 @@ import java.util.ArrayList;
 
 public interface DAOPedidoProductos {
 
-    public ArrayList<Producto> readAll(DAOManager dao, int idPedido);
+    ArrayList<Producto> readAll(DAOManager dao, int idPedido);
 
-    public boolean insert(DAOManager dao, Pedido pedido);
+    boolean insert(DAOManager dao, Pedido pedido);
 }

@@ -193,7 +193,6 @@ public class Persistencia {
                 bw.write("Inicio de sesión;" + (((Cliente) user).getNombre()) + ";Cliente;" + Utils.formateaFechaLog(LocalDateTime.now()) + "\n");
                 bw.close();
             } catch (IOException e) {
-                return;
             }
         }
     }
@@ -208,7 +207,6 @@ public class Persistencia {
             bw.write("Nuevo pedido;" + idCliente + ";" + idTrabajador + ";" + Utils.formateaFechaLog(LocalDateTime.now()) + "\n");
             bw.close();
         } catch (IOException e) {
-            return;
         }
     }
 
@@ -222,7 +220,6 @@ public class Persistencia {
             bw.write("Actualiza pedido;" + pedido.getId() + ";" + pedido.devuelveEstado(pedido.getEstado()) + ";" + Utils.formateaFechaLog(LocalDateTime.now()) + "\n");
             bw.close();
         } catch (IOException e) {
-            return;
         }
     }
 
@@ -261,7 +258,6 @@ public class Persistencia {
                 ultimoCierreSesionUsuario(((Cliente) user).getId());
                 bw.close();
             } catch (IOException e) {
-                return;
             }
         }
 
@@ -275,7 +271,6 @@ public class Persistencia {
             prop.setProperty(String.valueOf(idUsuario), Utils.formateaFechaLog(LocalDateTime.now()));
             prop.store(new FileOutputStream(RUTA_PROPERTIES), "Ultimo inicio sesion ID: " + idUsuario + " el " + Utils.formateaFecha(LocalDate.now()));
         } catch (IOException e) {
-            return;
         }
     }
 

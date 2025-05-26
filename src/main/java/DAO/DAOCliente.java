@@ -6,11 +6,11 @@ import java.util.ArrayList;
 
 public interface DAOCliente {
 
-    public ArrayList<Cliente> readAll(DAOManager dao);
+    ArrayList<Cliente> readAll(DAOManager dao);
 
-    public boolean insert(DAOManager dao, Cliente cliente);
+    boolean insert(DAOManager dao, Cliente cliente);
 
-    public boolean update(DAOManager dao, Cliente cliente);
+    boolean update(DAOManager dao, Cliente cliente);
 
-    public boolean delete(DAOManager dao, Cliente cliente);
+    boolean delete(DAOManager dao, Cliente cliente);
 }

@@ -17,8 +17,8 @@ public class Trabajador implements Serializable {
     private ArrayList<Pedido> pedidosAsignados;
 
     //DAO
-    private DAOManager dao = DAOManager.getSinglentonInstance();
-    private DAOPedidoSQL daoPedidoSQL = new DAOPedidoSQL();
+    private final DAOManager dao = DAOManager.getSinglentonInstance();
+    private final DAOPedidoSQL daoPedidoSQL = new DAOPedidoSQL();
 
     //Constructor
     public Trabajador(int idGenerada, String nombre, String pass, String email, int movil) {

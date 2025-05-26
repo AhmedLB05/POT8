@@ -22,9 +22,9 @@ public class Cliente implements Serializable {
     private ArrayList<Producto> carro;
 
     //DAO
-    private DAOManager dao = DAOManager.getSinglentonInstance();
-    private DAOCarroSQL daoCarroSQL = new DAOCarroSQL();
-    private DAOPedidoSQL daoPedidoSQL = new DAOPedidoSQL();
+    private final DAOManager dao = DAOManager.getSinglentonInstance();
+    private final DAOCarroSQL daoCarroSQL = new DAOCarroSQL();
+    private final DAOPedidoSQL daoPedidoSQL = new DAOPedidoSQL();
 
     //Constructor
     public Cliente(int idGenerada, String email, String clave, String nombre, String localidad, String provincia, String direccion, int movil) {
