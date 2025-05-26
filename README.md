@@ -255,9 +255,7 @@ Permite al cliente modificar sus datos personales.
 
 ![874e9033-0017-4c9c-b7e6-b9d6415383b0](https://github.com/user-attachments/assets/ef2bbe5c-878d-4f93-8e4e-855e754d11b1)
 
----
-
-## Nuevas implementaciones
+## Persistencia
 
 ### Persistencia de datos
 
@@ -280,4 +278,26 @@ El sistema mantiene los datos de los usuarios, productos, pedidos y trabajadores
 - **Se muestra la hora de ultimo inicio de sesión de un usuario**: Cuando un usuario inicia sesión en la cabecera de su menú se le muestra fecha y hora de su ultimo inicio de sesión:
 
 ![image](https://github.com/user-attachments/assets/412b8e61-3d12-4713-aae0-0b56eae25cda)
+
+## Nuevas implementaciones
+---
+
+### Guardado de datos en una Base de Datos
+
+El sistema ahora incluye la funcionalidad de guardar los datos del programa en una base de datos, incluye tanto configuraciones del programa como datos de clientes, trabajadores, administradores, productos, pedidos y un largo etcétera.
+
+Distribuimos nuestra base de datos en 7 tablas:
+
+![4749f521-708e-4f6a-a536-1ed39b0749b5](https://github.com/user-attachments/assets/f2c9fecc-7667-4a37-a7e0-f96aaa96a20c)
+
+- **Trabajador**: Con atributos como id, nombre, contraseña, email y movil, guardamos los datos de todos nuestros trabajadores.
+- **Admin**: Con atributos como id, nombre, contraseña y email, guardamos los datos de todos nuestros administradores. Aunque actualmente solo tenemos un solo admin.
+- **Pedido**: Con atributos como id, fecha del pedido, fecha de entrega estimada, estado del pedido, comentario que agrega nuestro trabajador encargado del pedido, id del cliente que realizó el pedido y id del trabajador que lo gestiona, guardamos los datos de todos nuestros pedidos.
+- **Cliente**: Con atributos como id, email, contraseña, nombre, localidad, provincia, dirección y movil, guardamos los datos de todos nuestros clientes.
+- **Pedido_Productos**: Con atributos como id del pedido y id del producto, establecemos la conexion entre los productos que se hayan en un pedido.
+- **Producto**: Con atributos como id, marca, modelo, descripción, precio y relevancia, guardamos los datos de todos nuestros productos.
+- **Carro**: Con atributos como id del cliente y id del producto, establecemos conexión entre los productos que se hayan en el carro de un cliente.
+
+
+
 
