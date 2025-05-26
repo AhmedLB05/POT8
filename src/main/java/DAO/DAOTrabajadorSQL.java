@@ -13,37 +13,32 @@ public class DAOTrabajadorSQL implements DAOTrabajador, Serializable {
 
     @Override
     public ArrayList<Trabajador> readAll(DAOManager dao) {
-        ArrayList<Trabajador> trabajadors = new ArrayList<>();
+        ArrayList<Trabajador> trabajadores = new ArrayList<>();
         String sentencia = "SELECT * FROM Trabajador";
 
         try {
             dao.open();
             PreparedStatement ps = dao.getConn().prepareStatement(sentencia);
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                trabajadors.add(new Trabajador(
-                        rs.getInt("id"),
-                        rs.getString("nombre"),
-                        rs.getString("pass"),
-                        rs.getString("email"),
-                        rs.getInt("movil")
-                ));
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    trabajadores.add(new Trabajador(
+                            rs.getInt("id"),
+                            rs.getString("nombre"),
+                            rs.getString("pass"),
+                            rs.getString("email"),
+                            rs.getInt("movil")
+                    ));
+                }
             }
-            rs.close();
-            ps.close();
-
-            for (Trabajador t : trabajadors) {
-                t.setPedidosAsignados(daoPedidoSQL.readPedidosByIdTrabajador(dao, t));
-            }
+            dao.close();
         } catch (Exception e) {
-            return null;
-        } finally {
-            try {
-                dao.close();
-            } catch (Exception ignored) {
-            }
+            throw new RuntimeException(e);
         }
-        return trabajadors;
+
+        for (Trabajador t : trabajadores) {
+            t.setPedidosAsignados(daoPedidoSQL.readPedidosByIdTrabajador(dao, t));
+        }
+        return trabajadores;
     }
 
     @Override
@@ -105,35 +100,5 @@ public class DAOTrabajadorSQL implements DAOTrabajador, Serializable {
             } catch (Exception ignored) {
             }
         }
-    }
-
-    @Override
-    public Trabajador buscaTrabajadorPrueba(DAOManager dao) {
-        Trabajador trabajador = null;
-        try {
-            dao.open();
-            String sentencia = "SELECT * FROM `Trabajador` WHERE `Trabajador`.`id` = '" + 100000 + "'";
-            PreparedStatement ps = dao.getConn().prepareStatement(sentencia);
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                trabajador = new Trabajador(
-                        rs.getInt("id"),
-                        rs.getString("nombre"),
-                        rs.getString("pass"),
-                        rs.getString("email"),
-                        rs.getInt("movil")
-                );
-            }
-            rs.close();
-            ps.close();
-        } catch (Exception e) {
-            return null;
-        } finally {
-            try {
-                dao.close();
-            } catch (Exception ignored) {
-            }
-        }
-        return trabajador;
     }
 }

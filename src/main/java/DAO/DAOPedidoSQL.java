@@ -123,12 +123,11 @@ public class DAOPedidoSQL implements DAOPedido, Serializable {
     @Override
     public ArrayList<Pedido> readPedidosByIdCliente(DAOManager dao, Cliente cliente) {
         ArrayList<Pedido> pedidos = new ArrayList<>();
-        String sentencia = "SELECT * FROM Pedido WHERE idCliente = ?";
+        String sentencia = "SELECT * FROM Pedido WHERE `idCliente` = '" + cliente.getId() + "'";
 
         try {
             dao.open();
             PreparedStatement ps = dao.getConn().prepareStatement(sentencia);
-            ps.setInt(1, cliente.getId());
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     pedidos.add(new Pedido(
@@ -141,28 +140,21 @@ public class DAOPedidoSQL implements DAOPedido, Serializable {
                     ));
                 }
             }
+            dao.close();
         } catch (Exception e) {
-            return null;
-        } finally {
-            try {
-                dao.close();
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
+            throw new RuntimeException(e);
         }
-
         return pedidos;
     }
 
     @Override
     public ArrayList<Pedido> readPedidosByIdTrabajador(DAOManager dao, Trabajador trabajador) {
         ArrayList<Pedido> pedidos = new ArrayList<>();
-        String sentencia = "SELECT * FROM Pedido WHERE idTrabajador = ?";
+        String sentencia = "SELECT * FROM Pedido WHERE `idTrabajador` = '" + trabajador.getId() + "'";
 
         try {
             dao.open();
             PreparedStatement ps = dao.getConn().prepareStatement(sentencia);
-            ps.setInt(1, trabajador.getId());
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     pedidos.add(new Pedido(
@@ -175,16 +167,10 @@ public class DAOPedidoSQL implements DAOPedido, Serializable {
                     ));
                 }
             }
+            dao.close();
         } catch (Exception e) {
-            return null;
-        } finally {
-            try {
-                dao.close();
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
+            throw new RuntimeException(e);
         }
-
         return pedidos;
     }
 }

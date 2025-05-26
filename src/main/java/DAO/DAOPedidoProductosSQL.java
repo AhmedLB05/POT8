@@ -28,7 +28,7 @@ public class DAOPedidoProductosSQL implements DAOPedidoProductos, Serializable {
             }
             dao.close();
         } catch (Exception e) {
-            return null;
+            throw new RuntimeException(e);
         }
 
         for (Producto p : daoProducto.readAll(dao)) {

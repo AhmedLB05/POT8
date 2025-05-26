@@ -13,5 +13,4 @@ public interface DAOTrabajador {
 
     boolean delete(DAOManager dao, Trabajador trabajador);
 
-    Trabajador buscaTrabajadorPrueba(DAOManager dao);
 }
