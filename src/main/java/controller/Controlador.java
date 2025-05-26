@@ -44,7 +44,8 @@ public class Controlador implements Serializable {
 
     public void mockAdmin() {
         boolean existe = false;
-        for (Admin a : daoAdminSQL.readAll(dao)) {
+        ArrayList<Admin> admins = daoAdminSQL.readAll(dao);
+        for (Admin a : admins) {
             if (a.getId() == 123456789) {
                 existe = true;
                 break;
@@ -98,21 +99,24 @@ public class Controlador implements Serializable {
 
     //Metodo para el login que devuelve el tipo de objeto
     public Object login(String email, String clave) {
-        for (Cliente c : getClientes()) {
+        ArrayList<Cliente> clientes = getClientes();
+        ArrayList<Trabajador> trabajadores = getTrabajadores();
+        ArrayList<Admin> admins = getAdmins();
+        for (Cliente c : clientes) {
             if (c.login(email, clave)) {
                 Persistencia.inicioSesionLog(c);
                 //guardaUltimoInicioSesion(c); Aqui no funciona porque sino cada vez que iniciemos sesion coge la fecha nueva
                 return c;
             }
         }
-        for (Trabajador t : getTrabajadores()) {
+        for (Trabajador t : trabajadores) {
             if (t.login(email, clave)) {
                 Persistencia.inicioSesionLog(t);
                 //guardaUltimoInicioSesion(t); Aqui no funciona porque sino cada vez que iniciemos sesion coge la fecha nueva
                 return t;
             }
         }
-        for (Admin a : getAdmins()) {
+        for (Admin a : admins) {
             if (a.login(email, clave)) {
                 Persistencia.inicioSesionLog(a);
                 //guardaUltimoInicioSesion(a); Aqui no funciona porque sino cada vez que iniciemos sesion coge la fecha nueva
@@ -136,13 +140,13 @@ public class Controlador implements Serializable {
     public boolean addProductoCarrito(Cliente cliente, int idProducto) {
         Producto producto = buscaProductoById(idProducto);
         if (producto == null) return false;
-        //cliente.getCarro().add(producto); //ARREGLADO
-        return daoCarroSQL.insert(dao, cliente, producto);//TODO
+        return daoCarroSQL.insert(dao, cliente, producto);
     }
 
     //Metodo que busca un producto por su id
     public Producto buscaProductoById(int id) {
-        for (Producto p : getCatalogo()) {
+        ArrayList<Producto> catalogo = getCatalogo();
+        for (Producto p : catalogo) {
             if (p.getId() == id) return p;
         }
         return null;
@@ -153,35 +157,39 @@ public class Controlador implements Serializable {
         Cliente clienteTemp = buscaClienteById(id);
         if (clienteTemp == null) {
             System.out.println(" * ERROR NO SE HA ENCONTRADO AL CLIENTE");
-        } else {
-            if (clienteTemp.getCarro().isEmpty()) return false;
+            return false;
+        }
 
-            ArrayList<Producto> copiaCarro = new ArrayList<>();
-            copiaCarro.addAll(clienteTemp.getCarro());
+        if (clienteTemp.getCarro().isEmpty()) return false;
 
-            Pedido pedidoTemp = new Pedido(generaIdPedido(), LocalDate.now(), "Pedido creado", copiaCarro);
+        ArrayList<Producto> copiaCarro = new ArrayList<>();
+        copiaCarro.addAll(clienteTemp.getCarro());
 
-            //clienteTemp.addPedido(pedidoTemp);
-            daoPedidoSQL.insert(dao, pedidoTemp, clienteTemp);
-            daoPedidoProductosSQL.insert(dao, pedidoTemp);
-            daoClienteSQL.update(dao, clienteTemp);
-            Persistencia.guardaResumenPedido(pedidoTemp);
-            EnvioMail.enviaCorreoResumen(clienteTemp.getEmail(), pedidoTemp);
-            clienteTemp.vaciaCarro();
-            daoCarroSQL.deleteAll(dao, clienteTemp);
-            Trabajador trabajadorTemp = buscaTrabajadorCandidatoParaAsignar();
+        Pedido pedidoTemp = new Pedido(generaIdPedido(), LocalDate.now(), "Pedido creado", copiaCarro);
 
-            if (trabajadorTemp != null) {
-                if (asignaPedido(pedidoTemp.getId(), trabajadorTemp.getId())) {
-                    PedidoClienteDataClass dataTemp = null;
+        daoPedidoSQL.insert(dao, pedidoTemp, clienteTemp);
+        daoPedidoProductosSQL.insert(dao, pedidoTemp);
+        daoClienteSQL.update(dao, clienteTemp);
+        Persistencia.guardaResumenPedido(pedidoTemp);
+        EnvioMail.enviaCorreoResumen(clienteTemp.getEmail(), pedidoTemp);
+        clienteTemp.vaciaCarro();
+        daoCarroSQL.deleteAll(dao, clienteTemp);
 
-                    for (PedidoClienteDataClass p : getPedidosAsignadosTrabajador(trabajadorTemp.getId())) {
-                        if (p.getIdPedido() == pedidoTemp.getId()) dataTemp = p;
+        Trabajador trabajadorTemp = buscaTrabajadorCandidatoParaAsignar();
+        if (trabajadorTemp != null) {
+            if (asignaPedido(pedidoTemp.getId(), trabajadorTemp.getId())) {
+                ArrayList<PedidoClienteDataClass> pedidosAsignados = getPedidosAsignadosTrabajador(trabajadorTemp.getId());
+                PedidoClienteDataClass dataTemp = null;
+                for (int i = 0; i < pedidosAsignados.size(); i++) {
+                    PedidoClienteDataClass p = pedidosAsignados.get(i);
+                    if (p.getIdPedido() == pedidoTemp.getId()) {
+                        dataTemp = p;
+                        break;
                     }
-                    daoPedidoSQL.updateTrabajador(dao, pedidoTemp, trabajadorTemp);
-                    EnvioMail.enviaCorreoPedido(trabajadorTemp, dataTemp, "SE LE HA ASIGNADO UN NUEVO PEDIDO");
-                    EnvioTelegram.enviaMensajeTrabajadorPedidoAsignado(trabajadorTemp, pedidoTemp);
                 }
+                daoPedidoSQL.updateTrabajador(dao, pedidoTemp, trabajadorTemp);
+                EnvioMail.enviaCorreoPedido(trabajadorTemp, dataTemp, "SE LE HA ASIGNADO UN NUEVO PEDIDO");
+                EnvioTelegram.enviaMensajeTrabajadorPedidoAsignado(trabajadorTemp, pedidoTemp);
             }
         }
         return true;
@@ -189,16 +197,16 @@ public class Controlador implements Serializable {
 
     //Metodo que busca un trabajador con menos pedidos para asignarle uno nuevo
     public Trabajador buscaTrabajadorCandidatoParaAsignar() {
+        ArrayList<Trabajador> trabajadores = getTrabajadores();
         int numPedidosMin = Integer.MAX_VALUE;
         Trabajador candidato = null;
-
-        for (Trabajador t : getTrabajadores()) {
+        for (Trabajador t : trabajadores) {
             if (t.numPedidosPendientes() < numPedidosMin) {
                 numPedidosMin = t.numPedidosPendientes();
                 candidato = t;
             }
         }
-        if (getTrabajadores().size() > 1) if (hayEmpateTrabajadoresCandidatos(candidato)) return null;
+        if (getTrabajadores().size() > 1) if (hayEmpateTrabajadoresCandidatos(candidato, trabajadores)) return null;
         return candidato;
     }
 
@@ -209,8 +217,8 @@ public class Controlador implements Serializable {
 
 
     //Metodo que nos indica si hay algún trabajador empatado en cuanto a pedidos pendientes con el trabajador que le pasamos
-    public boolean hayEmpateTrabajadoresCandidatos(Trabajador candidato) {
-        for (Trabajador t : getTrabajadores()) {
+    public boolean hayEmpateTrabajadoresCandidatos(Trabajador candidato, ArrayList<Trabajador> trabajadores) {
+        for (Trabajador t : trabajadores) {
             if (t.getId() != candidato.getId())
                 if (t.getPedidosPendientes().size() == candidato.getPedidosPendientes().size()) return true;
         }
@@ -219,7 +227,8 @@ public class Controlador implements Serializable {
 
     //Metodo que busca a un cliente por su ID
     public Cliente buscaClienteById(int idCliente) {
-        for (Cliente c : getClientes()) {
+        ArrayList<Cliente> clientes = getClientes();
+        for (Cliente c : clientes) {
             if (c.getId() == idCliente) return c;
         }
         return null;
@@ -227,7 +236,8 @@ public class Controlador implements Serializable {
 
     //Metodo que busca a un cliente por su ID (metodo inventado por Ahmed)
     public Object buscaClienteByEmail(String emailIntro) {
-        for (Cliente c : getClientes()) {
+        ArrayList<Cliente> clientes = getClientes();
+        for (Cliente c : clientes) {
             if (c.getEmail().equalsIgnoreCase(emailIntro)) return c;
         }
         return null;
@@ -244,27 +254,27 @@ public class Controlador implements Serializable {
     }
 
     //Metodo que busca en el catálogo productos que tengan coincidencia en el nombre de la marca
-    public ArrayList<Producto> buscaProductosByMarca(String marca) {
+    public ArrayList<Producto> buscaProductosByMarca(String marca, ArrayList<Producto> catalogo) {
         ArrayList<Producto> productosCoincideMarca = new ArrayList<>();
-        for (Producto p : getCatalogo()) {
+        for (Producto p : catalogo) {
             if (p.getMarca().toLowerCase().contains(marca.toLowerCase())) productosCoincideMarca.add(p);
         }
         return productosCoincideMarca;
     }
 
     //Metodo que busca en el catálogo productos que tengan coincidencia en el nombre del modelo
-    public ArrayList<Producto> buscaProductosByModelo(String modelo) {
+    public ArrayList<Producto> buscaProductosByModelo(String modelo, ArrayList<Producto> catalogo) {
         ArrayList<Producto> productosCoincideModelo = new ArrayList<>();
-        for (Producto p : getCatalogo()) {
+        for (Producto p : catalogo) {
             if (p.getModelo().toLowerCase().contains(modelo.toLowerCase())) productosCoincideModelo.add(p);
         }
         return productosCoincideModelo;
     }
 
     //Metodo que busca en el catálogo productos que tengan coincidencia en la descripcion
-    public ArrayList<Producto> buscaProductosByDescripcion(String descripcion) {
+    public ArrayList<Producto> buscaProductosByDescripcion(String descripcion, ArrayList<Producto> catalogo) {
         ArrayList<Producto> productosCoincideDescripcion = new ArrayList<>();
-        for (Producto p : getCatalogo()) {
+        for (Producto p : catalogo) {
             if (p.getDescripcion().toLowerCase().contains(descripcion.toLowerCase()))
                 productosCoincideDescripcion.add(p);
         }
@@ -272,11 +282,11 @@ public class Controlador implements Serializable {
     }
 
     //Metodo que busca en el catálogo producto un término que se encuentre en descripcion o marca o modelo
-    public ArrayList<Producto> buscaProductosByTermino(String termino) {
+    public ArrayList<Producto> buscaProductosByTermino(String termino, ArrayList<Producto> catalogo) {
         ArrayList<Producto> productosCoincideTermino = new ArrayList<>();
         String terminoLower = termino.toLowerCase();
 
-        for (Producto p : getCatalogo()) {
+        for (Producto p : catalogo) {
             if ((p.getDescripcion().toLowerCase().contains(terminoLower) || p.getMarca().toLowerCase().contains(terminoLower) || p.getModelo().toLowerCase().contains(terminoLower)) && !productosCoincideTermino.contains(p))
                 productosCoincideTermino.add(p);
         }
@@ -285,9 +295,9 @@ public class Controlador implements Serializable {
 
 
     //Metodo que busca en el catálogo producto que esten entre un rango de precios
-    public ArrayList<Producto> buscaProductosByPrecio(float precioMin, float precioMax) {
+    public ArrayList<Producto> buscaProductosByPrecio(float precioMin, float precioMax, ArrayList<Producto> catalogo) {
         ArrayList<Producto> productosCoincidePrecio = new ArrayList<>();
-        for (Producto p : getCatalogo()) {
+        for (Producto p : catalogo) {
             if (p != null && p.getPrecio() <= precioMax && p.getPrecio() >= precioMin) productosCoincidePrecio.add(p);
         }
         return productosCoincidePrecio;
@@ -313,9 +323,9 @@ public class Controlador implements Serializable {
     }
 
     //Metodo para ver la cantidad de pedidos en el sistema
-    public int numPedidosTotales() {
+    public int numPedidosTotales(ArrayList<Cliente> clientes) {
         int cont = 0;
-        for (Cliente c : getClientes()) {
+        for (Cliente c : clientes) {
             if (c.getPedidos() != null) cont += c.getPedidos().size();
         }
         return cont;
@@ -323,7 +333,8 @@ public class Controlador implements Serializable {
 
     //Metodo que busca un pedido por su ID
     public Pedido buscaPedidoById(int idPedido) {
-        for (Pedido p : getTodosPedidos()) {
+        ArrayList<Pedido> todosPedidos = getTodosPedidos();
+        for (Pedido p : todosPedidos) {
             if (p.getId() == idPedido) return p;
         }
         return null;
@@ -346,19 +357,22 @@ public class Controlador implements Serializable {
     }
 
     //Metodo que crea un trabajador y lo añade al array de trabajadores
-    public boolean nuevoTrabajador(String email, String clave, String nombre, int movil) { //TODO
+    public boolean nuevoTrabajador(String email, String clave, String nombre, int movil) {
+        ArrayList<Trabajador> trabajadores = getTrabajadores();
+        ArrayList<Cliente> clientes = getClientes();
+
         Trabajador nuevoTrabajador = new Trabajador(generaIdTrabajador(), nombre, clave, email, movil);
         daoTrabajadorSQL.insert(dao, nuevoTrabajador);
 
-        ArrayList<Pedido> pedidosSinAsignar = pedidosSinTrabajador();
+        ArrayList<Pedido> pedidosSinAsignar = pedidosSinTrabajador(trabajadores, clientes);
         Trabajador candidato = buscaTrabajadorCandidatoParaAsignar();
 
         if (!pedidosSinAsignar.isEmpty() && candidato != null) {
             for (Pedido p : pedidosSinAsignar) {
                 asignaPedido(p.getId(), candidato.getId());
             }
-
-            for (Pedido pedido : getTodosPedidos()) {
+            ArrayList<Pedido> todosPedidos = getTodosPedidos();
+            for (Pedido pedido : todosPedidos) {
                 for (PedidoClienteDataClass pDataClass : getPedidosAsignadosTrabajador(candidato.getId())) {
                     if (pedido.getId() == pDataClass.getIdPedido())
                         EnvioMail.enviaCorreoPedido(candidato, pDataClass, "SE LE HA ASIGNADO UN NUEVO PEDIDO");
@@ -370,7 +384,8 @@ public class Controlador implements Serializable {
 
     //Metodo que devuelve el trabajador al que está asignado un pedido
     public Trabajador buscaTrabajadorAsignadoAPedido(int idPedido) {
-        for (Trabajador t : getTrabajadores()) {
+        ArrayList<Trabajador> trabajadores = getTrabajadores();
+        for (Trabajador t : trabajadores) {
             for (Pedido p : t.getPedidosAsignados()) {
                 if (p.getId() == idPedido) return t;
             }
@@ -380,10 +395,8 @@ public class Controlador implements Serializable {
 
     //Metodo que nos devuelve los pedidos sin asignar recorre todos los trabajadores recabando los pedidos asignados
     //luego recorre los clientes pillando los pedidos y luego de la lista de pedidosClientes le quita los pedidos ya asignados a trabajadores
-    public ArrayList<Pedido> pedidosSinTrabajador() {
+    public ArrayList<Pedido> pedidosSinTrabajador(ArrayList<Trabajador> trabajadores, ArrayList<Cliente> clientes) {
         ArrayList<Pedido> pedidos = new ArrayList<>();
-        ArrayList<Trabajador> trabajadores = getTrabajadores();
-        ArrayList<Cliente> clientes = getClientes();
 
         if (!trabajadores.isEmpty()) {
             for (Cliente c : clientes) {
@@ -603,18 +616,18 @@ public class Controlador implements Serializable {
     }
 
     //Metodo que devuelve la cantidad de pedidos pendientes de todos los trabajadores
-    public int numPedidosPendientes() {
+    public int numPedidosPendientes(ArrayList<Trabajador> trabajadores) {
         int cont = 0;
-        for (Trabajador t : getTrabajadores()) {
+        for (Trabajador t : trabajadores) {
             if (!t.getPedidosPendientes().isEmpty()) cont += t.getPedidosPendientes().size();
         }
         return cont;
     }
 
     //Metodo que devuelve la cantidad de pedidos completados o cancelados de todos los trabajadores
-    public int numPedidosCompletadosCancelados() {
+    public int numPedidosCompletadosCancelados(ArrayList<Trabajador> trabajadores) {
         int cont = 0;
-        for (Trabajador t : getTrabajadores()) {
+        for (Trabajador t : trabajadores) {
             if (!t.getPedidosCompletados().isEmpty()) cont += t.getPedidosCompletados().size();
         }
         return cont;

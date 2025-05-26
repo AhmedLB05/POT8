@@ -42,22 +42,26 @@ public class Main {
 
     private static void datosPrueba(Controlador controlador) {
         boolean clientesVacios = false, trabajadoresVacios = false, adminsVacios = false, productosVacios = false;
+        ArrayList<Cliente> clientes = controlador.getClientes();
+        ArrayList<Trabajador> trabajadores = controlador.getTrabajadores();
+        ArrayList<Admin> admins = controlador.getAdmins();
+        ArrayList<Producto> productos = controlador.getCatalogo();
 
-        if (controlador.getClientes().isEmpty()) clientesVacios = true;
-        if (controlador.getTrabajadores().isEmpty()) trabajadoresVacios = true;
-        if (controlador.getAdmins().isEmpty()) adminsVacios = true;
+        if (clientes.isEmpty()) clientesVacios = true;
+        if (trabajadores.isEmpty()) trabajadoresVacios = true;
+        if (productos.isEmpty()) adminsVacios = true;
         //if (controlador.getCatalogo().isEmpty()) productosVacios = true;
 
         if (!clientesVacios || !trabajadoresVacios /*|| !adminsVacios || !productosVacios*/) {
             System.out.println("____________________________________________________________________________________________________");
             if (!clientesVacios)
-                System.out.println(" - Hay " + controlador.getClientes().size() + " cliente/s ya cargado/s en el sistema");
+                System.out.println(" - Hay " + clientes.size() + " cliente/s ya cargado/s en el sistema");
             if (!trabajadoresVacios)
-                System.out.println(" - Hay " + controlador.getTrabajadores().size() + " trabajador/es ya cargado/s en el sistema");
+                System.out.println(" - Hay " + trabajadores.size() + " trabajador/es ya cargado/s en el sistema");
             if (!adminsVacios)
-                System.out.println(" - Hay " + controlador.getAdmins().size() + " admin/s ya cargado/s en el sistema");
+                System.out.println(" - Hay " + admins.size() + " admin/s ya cargado/s en el sistema");
             if (!productosVacios)
-                System.out.println(" - Hay " + controlador.getCatalogo().size() + " producto/s ya cargado/s en el sistema");
+                System.out.println(" - Hay " + productos.size() + " producto/s ya cargado/s en el sistema");
             System.out.println("____________________________________________________________________________________________________");
             Utils.pulsaParaContinuar();
         }
@@ -192,7 +196,7 @@ public class Main {
 
     private static Object menuAccesoInvitado(Controlador controlador, Object usuarioLog) {
         int op;
-
+        ArrayList<Producto> catalogo = controlador.getCatalogo();
         do {
             try {
                 System.out.println();
@@ -209,7 +213,7 @@ public class Main {
 
         switch (op) {
             case 1: //Ver el catálogo
-                pintaCatalogo(controlador);
+                pintaCatalogo(controlador, catalogo);
                 break;
             case 2: //Registrarse
                 registroCliente(controlador);
@@ -308,11 +312,11 @@ public class Main {
     }
 
     //Metodo que pinta el catálogo
-    private static void pintaCatalogo(Controlador controlador) {
+    private static void pintaCatalogo(Controlador controlador, ArrayList<Producto> catalogo) {
         int cont = 0;
         String continuar;
-        if (controlador.getCatalogo().isEmpty()) System.out.println(" * ERROR EL CATÁLOGO ESTÁ VACIO");
-        for (Producto p : controlador.getCatalogo()) {
+        if (catalogo.isEmpty()) System.out.println(" * ERROR EL CATÁLOGO ESTÁ VACIO");
+        for (Producto p : catalogo) {
             if (cont == 5) {
                 System.out.print("\nPulsa ENTER para continuar o introduzca cualquier tecla para SALIR: ");
                 continuar = S.nextLine();
@@ -432,15 +436,20 @@ public class Main {
 
     //Metodo que pinta las estadisticas que le aparecen al admin
     private static void pintaEstadisticasAdmin(Controlador controlador) {
+        ArrayList<Cliente> clientes = controlador.getClientes();
+        ArrayList<Trabajador> trabajadores = controlador.getTrabajadores();
+
+        int numPedidosSinTrabajador = controlador.pedidosSinTrabajador(trabajadores, clientes).size();
+
         System.out.println();
-        System.out.println("Bienvenido Administrador. Tenemos " + controlador.pedidosSinTrabajador().size() + " pedido/s sin asignar. " + "Debe asignarlos a un trabajador.");
+        System.out.println("Bienvenido Administrador. Tenemos " + numPedidosSinTrabajador + " pedido/s sin asignar. " + "Debe asignarlos a un trabajador.");
         System.out.println("===============================================");
-        System.out.println("Número de clientes: " + controlador.getClientes().size());
-        System.out.println("Número de trabajadores: " + controlador.getTrabajadores().size());
-        System.out.println("Numero de pedidos: " + controlador.numPedidosTotales());
-        System.out.println("Número de pedidos pendientes: " + controlador.numPedidosPendientes());
-        System.out.println("Número de pedidos completados o cancelados: " + controlador.numPedidosCompletadosCancelados());
-        System.out.println("Número de pedidos sin asignar: " + controlador.pedidosSinTrabajador().size());
+        System.out.println("Número de clientes: " + clientes.size());
+        System.out.println("Número de trabajadores: " + trabajadores.size());
+        System.out.println("Numero de pedidos: " + controlador.numPedidosTotales(clientes));
+        System.out.println("Número de pedidos pendientes: " + controlador.numPedidosPendientes(trabajadores));
+        System.out.println("Número de pedidos completados o cancelados: " + controlador.numPedidosCompletadosCancelados(trabajadores));
+        System.out.println("Número de pedidos sin asignar: " + numPedidosSinTrabajador);
         System.out.println("===============================================");
     }
 
@@ -462,7 +471,7 @@ public class Main {
                 pintaResumenPedidos(controlador);
                 break;
             case 5: //Ver un resumen de todos los trabajadores
-                pintaResumenTrabajadores(controlador);
+                pintaResumenTrabajadores(controlador, controlador.getTrabajadores());
                 Utils.pulsaParaContinuar();
                 break;
             case 6: //Ver las estadísticas de la aplicación
@@ -619,12 +628,14 @@ public class Main {
     }
 
     private static void asignaPedidoTrabajador(Controlador controlador) {
-        ArrayList<Pedido> pedidosSinAsignar = controlador.pedidosSinTrabajador();
+        ArrayList<Trabajador> trabajadores = controlador.getTrabajadores();
+        ArrayList<Cliente> clientes = controlador.getClientes();
+        ArrayList<Pedido> pedidosSinAsignar = controlador.pedidosSinTrabajador(trabajadores, clientes);
 
         if (pedidosSinAsignar.isEmpty()) {
             System.out.println("No se ha realizado ningún pedido o no hay pedidos para asignar...");
             Utils.pulsaParaContinuar();
-        } else if (controlador.getTrabajadores().isEmpty()) System.out.println(" * ERROR NO HAY TRABAJADORES");
+        } else if (trabajadores.isEmpty()) System.out.println(" * ERROR NO HAY TRABAJADORES");
         else {
             Pedido pedidoTemp = null;
             Trabajador trabajadorTemp = null;
@@ -648,12 +659,12 @@ public class Main {
                 System.out.println(" * ERROR AL ELEGIR EL PEDIDO");
             }
 
-            pintaResumenTrabajadores(controlador);
+            pintaResumenTrabajadores(controlador, trabajadores);
 
             System.out.print("Introduce el trabajador para asignar un pedido: ");
             String trabajadorSeleccionado = S.nextLine();
             try {
-                trabajadorTemp = controlador.getTrabajadores().get(Integer.parseInt(trabajadorSeleccionado) - 1);
+                trabajadorTemp = trabajadores.get(Integer.parseInt(trabajadorSeleccionado) - 1);
             } catch (IndexOutOfBoundsException | NumberFormatException e) {
                 System.out.println(" * ERROR AL ELEGIR EL TRABAJADOR");
             }
@@ -668,7 +679,7 @@ public class Main {
                     EnvioTelegram.enviaMensajeTrabajadorPedidoAsignado(trabajadorTemp, pedidoTemp);
 
                     PedidoClienteDataClass dataTemp = null;
-                    for (Trabajador t : controlador.getTrabajadores()) {
+                    for (Trabajador t : trabajadores) {
                         for (PedidoClienteDataClass p : controlador.getPedidosAsignadosTrabajador(t.getId())) {
                             if (p.getIdPedido() == pedidoTemp.getId()) dataTemp = p;
                         }
@@ -676,7 +687,6 @@ public class Main {
                     EnvioMail.enviaCorreoPedido(trabajadorTemp, dataTemp, "SE LE HA ASIGNADO UN NUEVO PEDIDO");
                 } else System.out.println("Ha ocurrido un error...");
             }
-
         }
     }
 
@@ -701,7 +711,9 @@ public class Main {
 
     //Metodo para dar de baja a un trabajador
     private static void bajaTrabajador(Controlador controlador) {
-        if (controlador.getTrabajadores().isEmpty()) System.out.println(" * ERROR NO HAY TRABAJADORES EN EL SISTEMA");
+        ArrayList<Trabajador> trabajadores = controlador.getTrabajadores();
+        ArrayList<Cliente> clientes = controlador.getClientes();
+        if (trabajadores.isEmpty()) System.out.println(" * ERROR NO HAY TRABAJADORES EN EL SISTEMA");
         else {
             int id;
             do {
@@ -729,7 +741,7 @@ public class Main {
                             if (controlador.bajaTrabajador(t))
                                 System.out.println(" - Trabajador dado de baja correctamente");
                             else System.out.println(" * ERROR AL DAR DE BAJA AL TRABAJADOR");
-                            ArrayList<Pedido> pedidosSinAsignar = controlador.pedidosSinTrabajador();
+                            ArrayList<Pedido> pedidosSinAsignar = controlador.pedidosSinTrabajador(trabajadores, clientes);
                             Trabajador candidato = controlador.buscaTrabajadorCandidatoParaAsignar();
 
                             if (!pedidosSinAsignar.isEmpty() && candidato != null) {
@@ -861,11 +873,6 @@ public class Main {
                         System.out.println(p);
                         contCancelados++;
                     }
-                    try {
-                        Thread.sleep(500);
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
                 }
                 if (contCancelados != 0) Utils.pulsaParaContinuar();
             }
@@ -885,25 +892,19 @@ public class Main {
                         System.out.println(p);
                         contPendientes++;
                     }
-                    try {
-                        Thread.sleep(500);
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
                 }
                 Utils.pulsaParaContinuar();
             }
-
         }
     }
 
     //Metodo que pinta un resumen de los trabajadores para el admin
-    private static void pintaResumenTrabajadores(Controlador controlador) {
+    private static void pintaResumenTrabajadores(Controlador controlador, ArrayList<Trabajador> trabajadores) {
         int cont = 1;
-        if (controlador.getTrabajadores().isEmpty())
+        if (trabajadores.isEmpty())
             System.out.println(" * ERROR NO HAY TRABAJADORES REGISTRADOS EN EL SISTEMA");
         else {
-            for (Trabajador t : controlador.getTrabajadores()) {
+            for (Trabajador t : trabajadores) {
                 System.out.println(cont + " - ID: " + t.getId() + " - " + t.getNombre() + " movil: " + t.getMovil() + " - email: " + t.getEmail() + "\n");
                 cont++;
             }
@@ -912,10 +913,11 @@ public class Main {
 
     //Metodo que pinta un resumen de los clientes para el admin
     private static void pintaResumenClientes(Controlador controlador) {
-        if (controlador.getClientes().isEmpty())
+        ArrayList<Cliente> clientes = controlador.getClientes();
+        if (clientes.isEmpty())
             System.out.println(" * ERROR NO HAY CLIENTES REGISTRADOS EN EL SISTEMA");
         else {
-            for (Cliente c : controlador.getClientes()) {
+            for (Cliente c : clientes) {
                 System.out.println("- ID: " + c.getId() + " - " + c.getNombre() + " - " + c.getLocalidad() + "(" + c.getProvincia() + ") - email: " + c.getEmail() + " - movil: " + c.getMovil());
             }
         }
@@ -1232,6 +1234,7 @@ public class Main {
                 }
             }
         }
+        Utils.pulsaParaContinuar();
     }
 
     //Metodo que se encarga de modificar los datos de un trabajador
@@ -1293,7 +1296,7 @@ public class Main {
                 String email = S.nextLine();
 
                 if (controlador.buscaTrabajadorByEmail(email) != null)
-                    System.out.println(" * ERROR YA EXISTE UN CLIENTE CON ESTE EMAIL");
+                    System.out.println(" * ERROR YA EXISTE UN USUARIO CON ESTE EMAIL");
                 else if (verificacionTrabajador(email)) {
                     trabajadorCambiaDatos.setEmail(email);
                     controlador.actualizaDatosTrabajador(trabajadorCambiaDatos);
@@ -1784,8 +1787,9 @@ public class Main {
         Producto temp = null;
         int cont = 1;
         int productoSeleccionado;
+        ArrayList<Producto> catalogo = controlador.getCatalogo();
 
-        for (Producto p : controlador.getCatalogo()) {
+        for (Producto p : catalogo) {
             System.out.println("Producto " + cont);
             System.out.println(p);
             cont++;
@@ -1805,7 +1809,7 @@ public class Main {
             if (productoSeleccionado == -1) break;
 
             try {
-                temp = controlador.getCatalogo().get(productoSeleccionado - 1);
+                temp = catalogo.get(productoSeleccionado - 1);
                 //temp = controlador.buscaProductoById(temp.getId());
             } catch (IndexOutOfBoundsException e) {
                 System.out.println(" * ERROR INESPERADO");
@@ -1839,6 +1843,7 @@ public class Main {
     //Metodo que nos indica varias maneras de consultar el catálogo siendo cliente
     private static void consultaCatalogo(Controlador controlador) {
         int opcion;
+        ArrayList<Producto> catalogo = controlador.getCatalogo();
         do {
             System.out.println();
             System.out.println("""
@@ -1860,22 +1865,22 @@ public class Main {
             } while (true);
             switch (opcion) {
                 case 1: //Ver tódo el catálogo
-                    pintaCatalogo(controlador);
+                    pintaCatalogo(controlador, catalogo);
                     break;
                 case 2: //Búsqueda por marca
-                    buscaProductoMarca(controlador);
+                    buscaProductoMarca(controlador, catalogo);
                     break;
                 case 3: //Búsqueda por modelo
-                    buscaProductoModelo(controlador);
+                    buscaProductoModelo(controlador, catalogo);
                     break;
                 case 4: //Búsqueda por descripción
-                    buscaProductoDescripcion(controlador);
+                    buscaProductoDescripcion(controlador, catalogo);
                     break;
                 case 5: //Búsqueda por término
-                    buscaProductoTermino(controlador);
+                    buscaProductoTermino(controlador, catalogo);
                     break;
                 case 6: //Búsqueda por precio
-                    buscaProductoPrecio(controlador);
+                    buscaProductoPrecio(controlador, catalogo);
                     break;
                 case 7: //Salir
                     Utils.mensajeCierraPrograma();
@@ -2003,11 +2008,11 @@ public class Main {
     }
 
     //Metodo que busca productos por descripcion - modelo - marca
-    private static void buscaProductoTermino(Controlador controlador) {
+    private static void buscaProductoTermino(Controlador controlador, ArrayList<Producto> catalogo) {
         System.out.println();
         System.out.print(" - Introduzca el TERMINO a buscar: ");
         String termino = S.nextLine();
-        ArrayList<Producto> productosCoincideTermino = controlador.buscaProductosByTermino(termino);
+        ArrayList<Producto> productosCoincideTermino = controlador.buscaProductosByTermino(termino, catalogo);
         if (!productosCoincideTermino.isEmpty()) {
             pintaListaProductos(productosCoincideTermino);
             Utils.pulsaParaContinuar();
@@ -2015,7 +2020,7 @@ public class Main {
     }
 
     //Metodo que busca productos entre un rango de precio
-    private static void buscaProductoPrecio(Controlador controlador) {
+    private static void buscaProductoPrecio(Controlador controlador, ArrayList<Producto> catalogo) {
         boolean correcto = false;
         float precioMin = 0, precioMax = 0;
         do {
@@ -2037,7 +2042,7 @@ public class Main {
 
         } while (!correcto);
 
-        ArrayList<Producto> productosCoincidePrecio = controlador.buscaProductosByPrecio(precioMin, precioMax);
+        ArrayList<Producto> productosCoincidePrecio = controlador.buscaProductosByPrecio(precioMin, precioMax, catalogo);
         if (!productosCoincidePrecio.isEmpty()) {
             pintaListaProductos(productosCoincidePrecio);
             Utils.pulsaParaContinuar();
@@ -2046,11 +2051,11 @@ public class Main {
     }
 
     //Metodo que busca productos por descripcion
-    private static void buscaProductoDescripcion(Controlador controlador) {
+    private static void buscaProductoDescripcion(Controlador controlador, ArrayList<Producto> catalogo) {
         System.out.println();
         System.out.print(" - Introduzca la DESCRIPCIÓN del producto a buscar: ");
         String descripcion = S.nextLine();
-        ArrayList<Producto> productosCoincideDescripcion = controlador.buscaProductosByDescripcion(descripcion);
+        ArrayList<Producto> productosCoincideDescripcion = controlador.buscaProductosByDescripcion(descripcion, catalogo);
         if (!productosCoincideDescripcion.isEmpty()) {
             pintaListaProductos(productosCoincideDescripcion);
             Utils.pulsaParaContinuar();
@@ -2058,11 +2063,11 @@ public class Main {
     }
 
     //Metodo que busca productos por modelo
-    private static void buscaProductoModelo(Controlador controlador) {
+    private static void buscaProductoModelo(Controlador controlador, ArrayList<Producto> catalogo) {
         System.out.println();
         System.out.print(" - Introduzca el MODELO del producto a buscar: ");
         String modelo = S.nextLine();
-        ArrayList<Producto> productosCoincideModelo = controlador.buscaProductosByModelo(modelo);
+        ArrayList<Producto> productosCoincideModelo = controlador.buscaProductosByModelo(modelo, catalogo);
         if (!productosCoincideModelo.isEmpty()) {
             pintaListaProductos(productosCoincideModelo);
             Utils.pulsaParaContinuar();
@@ -2070,11 +2075,11 @@ public class Main {
     }
 
     //Metodo de la opcion para buscar productos por su marca
-    private static void buscaProductoMarca(Controlador controlador) {
+    private static void buscaProductoMarca(Controlador controlador, ArrayList<Producto> catalogo) {
         System.out.println();
         System.out.print(" - Introduzca la MARCA del producto a buscar: ");
         String marca = S.nextLine();
-        ArrayList<Producto> productosCoincideMarca = controlador.buscaProductosByMarca(marca);
+        ArrayList<Producto> productosCoincideMarca = controlador.buscaProductosByMarca(marca, catalogo);
         if (!productosCoincideMarca.isEmpty()) {
             pintaListaProductos(productosCoincideMarca);
             Utils.pulsaParaContinuar();

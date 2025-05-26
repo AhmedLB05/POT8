@@ -2,17 +2,18 @@ package DAO;
 
 import models.Trabajador;
 
+import java.io.Serializable;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
 
-public class DAOTrabajadorSQL implements DAOTrabajador {
+public class DAOTrabajadorSQL implements DAOTrabajador, Serializable {
     private final DAOPedidoSQL daoPedidoSQL = new DAOPedidoSQL();
 
     @Override
     public ArrayList<Trabajador> readAll(DAOManager dao) {
-        ArrayList<Trabajador> lista = new ArrayList<>();
+        ArrayList<Trabajador> trabajadors = new ArrayList<>();
         String sentencia = "SELECT * FROM Trabajador";
 
         try {
@@ -20,7 +21,7 @@ public class DAOTrabajadorSQL implements DAOTrabajador {
             PreparedStatement ps = dao.getConn().prepareStatement(sentencia);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
-                lista.add(new Trabajador(
+                trabajadors.add(new Trabajador(
                         rs.getInt("id"),
                         rs.getString("nombre"),
                         rs.getString("pass"),
@@ -31,18 +32,18 @@ public class DAOTrabajadorSQL implements DAOTrabajador {
             rs.close();
             ps.close();
 
-            for (Trabajador t : lista) {
+            for (Trabajador t : trabajadors) {
                 t.setPedidosAsignados(daoPedidoSQL.readPedidosByIdTrabajador(dao, t));
             }
-            dao.close();
-            return lista;
         } catch (Exception e) {
+            return null;
+        } finally {
             try {
                 dao.close();
             } catch (Exception ignored) {
             }
-            throw new RuntimeException(e);
         }
+        return trabajadors;
     }
 
     @Override
@@ -54,14 +55,15 @@ public class DAOTrabajadorSQL implements DAOTrabajador {
                     trabajador.getEmail() + "', '" + trabajador.getMovil() + "')";
             Statement stmt = dao.getConn().createStatement();
             stmt.executeUpdate(sentencia);
-            dao.close();
+            stmt.close();
             return true;
         } catch (Exception e) {
+            return false;
+        } finally {
             try {
                 dao.close();
             } catch (Exception ignored) {
             }
-            return false;
         }
     }
 
@@ -74,14 +76,15 @@ public class DAOTrabajadorSQL implements DAOTrabajador {
                     + "' WHERE `Trabajador`.`id` = " + trabajador.getId();
             Statement stmt = dao.getConn().createStatement();
             stmt.executeUpdate(sentencia);
-            dao.close();
+            stmt.close();
             return true;
         } catch (Exception e) {
+            return false;
+        } finally {
             try {
                 dao.close();
             } catch (Exception ignored) {
             }
-            return false;
         }
     }
 
@@ -92,22 +95,23 @@ public class DAOTrabajadorSQL implements DAOTrabajador {
             String sentencia = "DELETE FROM Trabajador WHERE `Trabajador`.`id` = '" + trabajador.getId() + "'";
             Statement stmt = dao.getConn().createStatement();
             stmt.executeUpdate(sentencia);
-            dao.close();
+            stmt.close();
             return true;
         } catch (Exception e) {
+            return false;
+        } finally {
             try {
                 dao.close();
             } catch (Exception ignored) {
             }
-            return false;
         }
     }
 
     @Override
     public Trabajador buscaTrabajadorPrueba(DAOManager dao) {
+        Trabajador trabajador = null;
         try {
             dao.open();
-            Trabajador trabajador = null;
             String sentencia = "SELECT * FROM `Trabajador` WHERE `Trabajador`.`id` = '" + 100000 + "'";
             PreparedStatement ps = dao.getConn().prepareStatement(sentencia);
             ResultSet rs = ps.executeQuery();
@@ -122,14 +126,14 @@ public class DAOTrabajadorSQL implements DAOTrabajador {
             }
             rs.close();
             ps.close();
-            dao.close();
-            return trabajador;
         } catch (Exception e) {
+            return null;
+        } finally {
             try {
                 dao.close();
             } catch (Exception ignored) {
             }
-            return null;
         }
+        return trabajador;
     }
 }

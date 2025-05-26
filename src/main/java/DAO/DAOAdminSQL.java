@@ -2,13 +2,14 @@ package DAO;
 
 import models.Admin;
 
+import java.io.Serializable;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 
-public class DAOAdminSQL implements DAOAdmin {
+public class DAOAdminSQL implements DAOAdmin, Serializable {
 
     @Override
     public ArrayList<Admin> readAll(DAOManager dao) {
@@ -17,16 +18,10 @@ public class DAOAdminSQL implements DAOAdmin {
 
         try {
             dao.open();
-            try (PreparedStatement ps = dao.getConn().prepareStatement(sentencia);
-                 ResultSet rs = ps.executeQuery()) {
+            try (PreparedStatement ps = dao.getConn().prepareStatement(sentencia); ResultSet rs = ps.executeQuery()) {
 
                 while (rs.next()) {
-                    lista.add(new Admin(
-                            rs.getInt("id"),
-                            rs.getString("nombre"),
-                            rs.getString("clave"),
-                            rs.getString("email")
-                    ));
+                    lista.add(new Admin(rs.getInt("id"), rs.getString("nombre"), rs.getString("clave"), rs.getString("email")));
                 }
 
             }

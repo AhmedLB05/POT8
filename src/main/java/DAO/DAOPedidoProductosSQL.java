@@ -3,12 +3,13 @@ package DAO;
 import models.Pedido;
 import models.Producto;
 
+import java.io.Serializable;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
 
-public class DAOPedidoProductosSQL implements DAOPedidoProductos {
+public class DAOPedidoProductosSQL implements DAOPedidoProductos, Serializable {
     private final DAOProductoSQL daoProducto = new DAOProductoSQL();
 
     @Override
@@ -27,7 +28,7 @@ public class DAOPedidoProductosSQL implements DAOPedidoProductos {
             }
             dao.close();
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            return null;
         }
 
         for (Producto p : daoProducto.readAll(dao)) {
