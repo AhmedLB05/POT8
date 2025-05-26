@@ -18,48 +18,39 @@ public class DAOClienteSQL implements DAOCliente {
         String sentencia = "SELECT * FROM Cliente";
 
         try {
-            dao.open();
-            try (PreparedStatement ps = dao.getConn().prepareStatement(sentencia);
-                 ResultSet rs = ps.executeQuery()) {
+            dao.open();  // Abrir conexión aquí
+
+            // 1. Leer todos los clientes
+            try (PreparedStatement ps = dao.getConn().prepareStatement(sentencia); ResultSet rs = ps.executeQuery()) {
 
                 while (rs.next()) {
-                    Cliente cliente = new Cliente(
-                            rs.getInt("id"),
-                            rs.getString("email"),
-                            rs.getString("clave"),
-                            rs.getString("nombre"),
-                            rs.getString("localidad"),
-                            rs.getString("provincia"),
-                            rs.getString("direccion"),
-                            rs.getInt("movil")
-                    );
+                    Cliente cliente = new Cliente(rs.getInt("id"), rs.getString("email"), rs.getString("clave"), rs.getString("nombre"), rs.getString("localidad"), rs.getString("provincia"), rs.getString("direccion"), rs.getInt("movil"));
                     clientes.add(cliente);
                 }
-
-                // Cargar pedidos y carro usando la misma conexión abierta
-                for (Cliente c : clientes) {
-                    c.setPedidos(daoPedidoSQL.readPedidosByIdCliente(dao, c));
-                    c.setCarro(daoCarroSQL.readAll(dao, c));
-                }
-
             }
+
+            // 2. Cargar datos relacionados (usando MISMA conexión)
+            for (Cliente c : clientes) {
+                // Métodos secundarios NO deben cerrar la conexión
+                c.setPedidos(daoPedidoSQL.readPedidosByIdCliente(dao, c));
+                c.setCarro(daoCarroSQL.readAll(dao, c));
+            }
+
         } catch (Exception e) {
-            throw new RuntimeException("Error al leer los clientes", e);
+            throw new RuntimeException("Error al leer clientes", e);
         } finally {
             try {
-                dao.close();
+                dao.close();  // Cerrar conexión aquí (una sola vez)
             } catch (SQLException e) {
-                throw new RuntimeException("Error al cerrar la conexión", e);
+                throw new RuntimeException("Error al cerrar conexión", e);
             }
         }
-
         return clientes;
     }
 
     @Override
     public boolean insert(DAOManager dao, Cliente cliente) {
-        String sentencia = "INSERT INTO Cliente (id, email, clave, nombre, localidad, provincia, direccion, movil) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        String sentencia = "INSERT INTO Cliente (id, email, clave, nombre, localidad, provincia, direccion, movil) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
         try {
             dao.open();
@@ -82,15 +73,14 @@ public class DAOClienteSQL implements DAOCliente {
             try {
                 dao.close();
             } catch (SQLException e) {
-                throw new RuntimeException("Error al cerrar la conexión", e);
+                throw new RuntimeException("Error al cerrar conexión", e);
             }
         }
     }
 
     @Override
     public boolean update(DAOManager dao, Cliente cliente) {
-        String sentencia = "UPDATE Cliente SET email = ?, clave = ?, nombre = ?, localidad = ?, provincia = ?, " +
-                "direccion = ?, movil = ? WHERE id = ?";
+        String sentencia = "UPDATE Cliente SET email = ?, clave = ?, nombre = ?, localidad = ?, provincia = ?, direccion = ?, movil = ? WHERE id = ?";
 
         try {
             dao.open();
@@ -113,7 +103,7 @@ public class DAOClienteSQL implements DAOCliente {
             try {
                 dao.close();
             } catch (SQLException e) {
-                throw new RuntimeException("Error al cerrar la conexión", e);
+                throw new RuntimeException("Error al cerrar conexión", e);
             }
         }
     }
@@ -135,7 +125,7 @@ public class DAOClienteSQL implements DAOCliente {
             try {
                 dao.close();
             } catch (SQLException e) {
-                throw new RuntimeException("Error al cerrar la conexión", e);
+                throw new RuntimeException("Error al cerrar conexión", e);
             }
         }
     }

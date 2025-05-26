@@ -166,9 +166,10 @@ public class Controlador implements Serializable {
 
             Pedido pedidoTemp = new Pedido(generaIdPedido(), LocalDate.now(), "Pedido creado", copiaCarro);
 
-            clienteTemp.addPedido(pedidoTemp);
+            //clienteTemp.addPedido(pedidoTemp);
             daoPedidoSQL.insert(dao, pedidoTemp, clienteTemp);
             daoPedidoProductosSQL.insert(dao, pedidoTemp);
+            daoClienteSQL.update(dao, clienteTemp);
             Persistencia.guardaResumenPedido(pedidoTemp);
             EnvioMail.enviaCorreoResumen(clienteTemp.getEmail(), pedidoTemp);
             clienteTemp.vaciaCarro();
@@ -732,5 +733,12 @@ public class Controlador implements Serializable {
         Persistencia.guardaAdminsPersistencia(getAdmins());
         Persistencia.guardaClientesPersistencia(getClientes());
         Persistencia.guardaTrabajadoresPersistencia(getTrabajadores());
+    }
+
+    public Admin buscaAdminByID(int id) {
+        for (Admin a : getAdmins()) {
+            if (a.getId() == id) return a;
+        }
+        return null;
     }
 }

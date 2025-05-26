@@ -443,6 +443,7 @@ public class Main {
 
     //Metodo que contiene el switch del menu administrador
     private static void menuAdmin(Controlador controlador, int opAdmin, Admin admin) {
+        Admin adminLog = controlador.buscaAdminByID(admin.getId());
         switch (opAdmin) {
             case 1: //Ver todoo el catálogo
                 consultaCatalogo(controlador);
@@ -1100,13 +1101,14 @@ public class Main {
 
     //Metodo que contiene el switch del menu trabajador
     private static void menuTrabajador(Controlador controlador, int opTrabajador, Trabajador trabajador) {
+        Trabajador trabajadorLog = controlador.buscaTrabajadorByID(trabajador.getId());
         switch (opTrabajador) {
             case 1: //Consultar los pedidos que tengo asignados
-                consultaPedidosAsignados(controlador, trabajador);
+                consultaPedidosAsignados(controlador, trabajadorLog);
                 Utils.pulsaParaContinuar();
                 break;
             case 2: //Modificar el estado de un pedido
-                modificaEstadoComentarioPedido(controlador, trabajador);
+                modificaEstadoComentarioPedido(controlador, trabajadorLog);
                 break;
             case 3: //Consultar el catálogo de productos
                 consultaCatalogo(controlador);
@@ -1115,16 +1117,16 @@ public class Main {
                 modificaProducto(controlador);
                 break;
             case 5: //Ver el histórico de pedidos terminados
-                historicoPedidosTerminados(trabajador, controlador);
+                historicoPedidosTerminados(trabajadorLog, controlador);
                 break;
             case 6: //Ver mi perfil
-                pintaPerfilTrabajador(trabajador);
+                pintaPerfilTrabajador(controlador, trabajadorLog);
                 break;
             case 7: //Modificar mis datos personales
-                modificaDatosTrabajador(controlador, trabajador);
+                modificaDatosTrabajador(controlador, trabajadorLog);
                 break;
             case 8: //Salir
-                controlador.guardaUltimoInicioSesion(trabajador);
+                controlador.guardaUltimoInicioSesion(trabajadorLog);
                 controlador.guardaAdmin();
                 controlador.guardaClientes();
                 controlador.guardaCatalogo();
@@ -1338,7 +1340,8 @@ public class Main {
     }
 
     //Metodo que se encarga de pinta el perfil del trabajador
-    private static void pintaPerfilTrabajador(Trabajador trabajador) {
+    private static void pintaPerfilTrabajador(Controlador controlador, Trabajador trabajador) {
+        Trabajador trabajadorPinta = controlador.buscaTrabajadorByID(trabajador.getId());
         System.out.println(trabajador);
     }
 
@@ -1535,27 +1538,28 @@ public class Main {
 
     //Metodo que contiene el switch del menu cliente TODO
     private static void menuCliente(Controlador controlador, int opCliente, Cliente cliente) {
+        Cliente clienteLog = controlador.buscaClienteById(cliente.getId());
 
         switch (opCliente) {
             case 1: //Consultar el catálogo de productos
                 consultaCatalogo(controlador);
                 break;
             case 2: //Realizar un pedido TODO
-                realizaPedidoCliente(cliente, controlador);
+                realizaPedidoCliente(clienteLog, controlador);
                 break;
             case 3: //Ver mis pedidos
-                pintaPedidosCliente(cliente);
+                pintaPedidosCliente(clienteLog);
                 Utils.pulsaParaContinuar();
                 break;
             case 4: //Ver mis datos personales
-                pintaDatosPersonalesCliente(cliente);
+                pintaDatosPersonalesCliente(controlador, clienteLog);
                 Utils.pulsaParaContinuar();
                 break;
             case 5: //Modificar mis datos personales
-                modificaDatosCliente(controlador, cliente);
+                modificaDatosCliente(controlador, clienteLog);
                 break;
             case 6: //Salir
-                controlador.guardaUltimoInicioSesion(cliente);
+                controlador.guardaUltimoInicioSesion(clienteLog);
                 controlador.guardaAdmin();
                 controlador.guardaClientes();
                 controlador.guardaCatalogo();
@@ -1814,7 +1818,8 @@ public class Main {
     }
 
     //Metodo que pinta los datos personales de un cliente que le pasemos
-    private static void pintaDatosPersonalesCliente(Cliente cliente) {
+    private static void pintaDatosPersonalesCliente(Controlador controlador, Cliente cliente) {
+        Cliente pintaCliente = controlador.buscaClienteById(cliente.getId());
         System.out.println("──────────────────────────────────────────────────────────────────────────────────────────────────");
         System.out.println("""
                                     ____        _                                                    _          \s
@@ -1825,7 +1830,7 @@ public class Main {
                                                               |_|                                               \s
                                            \s
                 """);
-        System.out.println(cliente);
+        System.out.println(pintaCliente);
         System.out.println("──────────────────────────────────────────────────────────────────────────────────────────────────");
     }
 
