@@ -282,7 +282,7 @@ El sistema mantiene los datos de los usuarios, productos, pedidos y trabajadores
 ## Nuevas implementaciones
 ---
 
-### Guardado de datos en una Base de Datos
+### Guardado de datos en una base de datos
 
 El sistema ahora incluye la funcionalidad de guardar los datos del programa en una base de datos, incluye tanto configuraciones del programa como datos de clientes, trabajadores, administradores, productos, pedidos y un largo etcétera.
 
@@ -297,7 +297,3 @@ Distribuimos nuestra base de datos en 7 tablas:
 - **Pedido_Productos**: Con atributos como id del pedido y id del producto, establecemos la conexion entre los productos que se hayan en un pedido.
 - **Producto**: Con atributos como id, marca, modelo, descripción, precio y relevancia, guardamos los datos de todos nuestros productos.
 - **Carro**: Con atributos como id del cliente y id del producto, establecemos conexión entre los productos que se hayan en el carro de un cliente.
-
-
-
-
