@@ -8,6 +8,9 @@ import java.util.ArrayList;
 
 public class Trabajador implements Serializable {
 
+    //DAO
+    private final DAOManager dao = DAOManager.getSinglentonInstance();
+    private final DAOPedidoSQL daoPedidoSQL = new DAOPedidoSQL();
     //Atributos
     private int id;
     private String nombre;
@@ -15,10 +18,6 @@ public class Trabajador implements Serializable {
     private String email;
     private int movil;
     private ArrayList<Pedido> pedidosAsignados;
-
-    //DAO
-    private final DAOManager dao = DAOManager.getSinglentonInstance();
-    private final DAOPedidoSQL daoPedidoSQL = new DAOPedidoSQL();
 
     //Constructor
     public Trabajador(int idGenerada, String nombre, String pass, String email, int movil) {

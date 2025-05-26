@@ -9,6 +9,10 @@ import java.util.ArrayList;
 
 public class Cliente implements Serializable {
 
+    //DAO
+    private final DAOManager dao = DAOManager.getSinglentonInstance();
+    private final DAOCarroSQL daoCarroSQL = new DAOCarroSQL();
+    private final DAOPedidoSQL daoPedidoSQL = new DAOPedidoSQL();
     //Atributos
     private int id;
     private String email;
@@ -20,11 +24,6 @@ public class Cliente implements Serializable {
     private int movil;
     private ArrayList<Pedido> pedidos;
     private ArrayList<Producto> carro;
-
-    //DAO
-    private final DAOManager dao = DAOManager.getSinglentonInstance();
-    private final DAOCarroSQL daoCarroSQL = new DAOCarroSQL();
-    private final DAOPedidoSQL daoPedidoSQL = new DAOPedidoSQL();
 
     //Constructor
     public Cliente(int idGenerada, String email, String clave, String nombre, String localidad, String provincia, String direccion, int movil) {
