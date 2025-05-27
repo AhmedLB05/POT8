@@ -14,7 +14,7 @@ public class DAOAdminSQL implements DAOAdmin, Serializable {
     @Override
     public ArrayList<Admin> readAll(DAOManager dao) {
         ArrayList<Admin> lista = new ArrayList<>();
-        String sentencia = "SELECT id, nombre, clave, email FROM Admin"; // Más claro y explícito
+        String sentencia = "SELECT id, nombre, clave, email FROM Admin";
 
         try {
             dao.open();
