@@ -118,38 +118,6 @@ public class Main {
 
 
         }
-        /*if (adminsVacios) {
-            String respuesta;
-            do {
-                System.out.print("¿Desea agregar datos de ADMINS de prueba? (S/N): ");
-                respuesta = S.nextLine();
-                if (!respuesta.equalsIgnoreCase("s") && !respuesta.equalsIgnoreCase("n"))
-                    System.out.println(" * ERROR DEBE RESPONDER CON S o N");
-            } while (!respuesta.equalsIgnoreCase("s") && !respuesta.equalsIgnoreCase("n"));
-            if (respuesta.equalsIgnoreCase("s")) {
-
-                System.out.println("""
-                        DATOS DE INICIO DE SESION ADMIN
-                        ==================================================================================
-                        Admin 1:
-                            email: admin@admin.com
-                            clave: admin
-                        """);
-                controlador.mockAdmin();
-                Utils.pulsaParaContinuar();
-            }
-        }*/
-        /*if (productosVacios) {
-            String respuesta;
-            do {
-                System.out.print("¿Desea agregar datos de PRODUCTOS de prueba? (S/N): ");
-                respuesta = S.nextLine();
-                if (!respuesta.equalsIgnoreCase("s") && !respuesta.equalsIgnoreCase("n"))
-                    System.out.println(" * ERROR DEBE RESPONDER CON S o N");
-            } while (!respuesta.equalsIgnoreCase("s") && !respuesta.equalsIgnoreCase("n"));
-            if (respuesta.equalsIgnoreCase("s")) controlador.mockCatalogo();
-        }*/
-
     }
 
     private static Object menuInicio(Controlador controlador) {
@@ -212,7 +180,7 @@ public class Main {
 
         switch (op) {
             case 1: //Ver el catálogo
-                pintaCatalogo(controlador, catalogo);
+                pintaCatalogo(catalogo);
                 break;
             case 2: //Registrarse
                 registroCliente(controlador);
@@ -230,15 +198,13 @@ public class Main {
 
     //Metodo login
     private static Object login(Controlador controlador) {
-        Object usuario = null;
+        Object usuario;
         String emailIntro, claveIntro;
         System.out.print("\n - Introduzca su email: ");
         emailIntro = S.nextLine();
         System.out.print(" - Introduzca su contraseña: ");
         claveIntro = S.nextLine();
         usuario = controlador.login(emailIntro, claveIntro);
-        //if (usuario == null) System.out.println("\nERROR AL INICIAR SESIÓN, VOLVIENDO AL MENÚ PRINCIPAL\n");
-        //else menuUsuario(controlador, usuario);
         return usuario;
     }
 
@@ -311,7 +277,7 @@ public class Main {
     }
 
     //Metodo que pinta el catálogo
-    private static void pintaCatalogo(Controlador controlador, ArrayList<Producto> catalogo) {
+    private static void pintaCatalogo(ArrayList<Producto> catalogo) {
         int cont = 0;
         String continuar;
         if (catalogo.isEmpty()) System.out.println(" * ERROR EL CATÁLOGO ESTÁ VACIO");
@@ -454,7 +420,6 @@ public class Main {
 
     //Metodo que contiene el switch del menu administrador
     private static void menuAdmin(Controlador controlador, int opAdmin, Admin admin) {
-        Admin adminLog = controlador.buscaAdminByID(admin.getId());
         switch (opAdmin) {
             case 1: //Ver todoo el catálogo
                 consultaCatalogo(controlador);
@@ -470,7 +435,7 @@ public class Main {
                 pintaResumenPedidos(controlador);
                 break;
             case 5: //Ver un resumen de todos los trabajadores
-                pintaResumenTrabajadores(controlador, controlador.getTrabajadores());
+                pintaResumenTrabajadores(controlador.getTrabajadores());
                 Utils.pulsaParaContinuar();
                 break;
             case 6: //Ver las estadísticas de la aplicación
@@ -494,7 +459,7 @@ public class Main {
                 Utils.pulsaParaContinuar();
                 break;
             case 12: //Enviar listado de pedidos por correo
-                enviaExcel(controlador, admin);
+                enviaExcel(controlador);
                 Utils.pulsaParaContinuar();
                 break;
             case 13: //Realizar una copia de seguridad
@@ -512,7 +477,7 @@ public class Main {
         }
     }
 
-    private static void enviaExcel(Controlador controlador, Admin admin) {
+    private static void enviaExcel(Controlador controlador) {
         if (controlador.getTodosPedidos().isEmpty()) System.out.println(" * ERROR NO SE HAN REALIZADO PEDIDOS");
         else {
             System.out.print("Introduzca el correo al que desea enviar el listado de pedidos: ");
@@ -543,7 +508,7 @@ public class Main {
     }
 
     private static void recuperaBackup(Controlador controlador) {
-        String respuesta = "";
+        String respuesta;
         do {
             System.out.print("¿Quiere recuperar el backup desde la ruta por defecto 'data/backup' ? (S/N) (-1 para salir): ");
             respuesta = S.nextLine();
@@ -584,7 +549,7 @@ public class Main {
     }
 
     private static void realizaBackup(Controlador controlador) {
-        String respuesta = "";
+        String respuesta;
         do {
             System.out.print("¿Quiere usar la ruta por defecto: 'data/backup' ? (S/N) (-1 para salir): ");
             respuesta = S.nextLine();
@@ -658,7 +623,7 @@ public class Main {
                 System.out.println(" * ERROR AL ELEGIR EL PEDIDO");
             }
 
-            pintaResumenTrabajadores(controlador, trabajadores);
+            pintaResumenTrabajadores(trabajadores);
 
             System.out.print("Introduce el trabajador para asignar un pedido: ");
             String trabajadorSeleccionado = S.nextLine();
@@ -876,7 +841,6 @@ public class Main {
                 if (contCancelados != 0) Utils.pulsaParaContinuar();
             }
             if (op == 1 || op == 4) {
-                int contPendientes = 0;
                 System.out.println("\n╔════════════════════════════════════════════╗");
                 System.out.println("""
                                       ┏┓   ┓• ┓            ┓•       \s
@@ -889,7 +853,6 @@ public class Main {
                 for (Pedido p : pedidos) {
                     if (p.getEstado() == 1 || p.getEstado() == 2 || p.getEstado() == 0) {
                         System.out.println(p);
-                        contPendientes++;
                     }
                 }
                 Utils.pulsaParaContinuar();
@@ -898,7 +861,7 @@ public class Main {
     }
 
     //Metodo que pinta un resumen de los trabajadores para el admin
-    private static void pintaResumenTrabajadores(Controlador controlador, ArrayList<Trabajador> trabajadores) {
+    private static void pintaResumenTrabajadores(ArrayList<Trabajador> trabajadores) {
         int cont = 1;
         if (trabajadores.isEmpty()) System.out.println(" * ERROR NO HAY TRABAJADORES REGISTRADOS EN EL SISTEMA");
         else {
@@ -1340,7 +1303,7 @@ public class Main {
     //Metodo que se encarga de pinta el perfil del trabajador
     private static void pintaPerfilTrabajador(Controlador controlador, Trabajador trabajador) {
         Trabajador trabajadorPinta = controlador.buscaTrabajadorByID(trabajador.getId());
-        System.out.println(trabajador);
+        System.out.println(trabajadorPinta);
     }
 
     //Metodo que se encarga de modificar el estado y el comentario de un pedido asignado a un trabajador
@@ -1862,7 +1825,7 @@ public class Main {
             } while (true);
             switch (opcion) {
                 case 1: //Ver tódo el catálogo
-                    pintaCatalogo(controlador, catalogo);
+                    pintaCatalogo(catalogo);
                     break;
                 case 2: //Búsqueda por marca
                     buscaProductoMarca(controlador, catalogo);

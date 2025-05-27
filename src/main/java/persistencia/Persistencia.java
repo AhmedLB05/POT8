@@ -100,7 +100,7 @@ public class Persistencia {
 
         if (!directorioCliente.exists()) directorioCliente.mkdirs();
         for (Cliente c : clientesGuardado) {
-            ObjectOutputStream oos = null;
+            ObjectOutputStream oos;
             try {
                 oos = new ObjectOutputStream(new FileOutputStream(directorioCliente + "/" + c.getId() + ".cliente"));
                 oos.writeObject(c);
@@ -117,7 +117,7 @@ public class Persistencia {
         File directorioTrabajadores = new File(getRutaTrabajadores());
         if (!directorioTrabajadores.exists()) directorioTrabajadores.mkdirs();
         for (Trabajador t : trabajadoresGuardado) {
-            ObjectOutputStream oos = null;
+            ObjectOutputStream oos;
             try {
                 oos = new ObjectOutputStream(new FileOutputStream(directorioTrabajadores + "/" + t.getId() + ".trabajadores"));
                 oos.writeObject(t);
@@ -135,7 +135,7 @@ public class Persistencia {
 
         if (!directorioAdmins.exists()) directorioAdmins.mkdirs();
         for (Admin a : adminsGuardado) {
-            ObjectOutputStream oos = null;
+            ObjectOutputStream oos;
             try {
                 oos = new ObjectOutputStream(new FileOutputStream(directorioAdmins + "/" + a.getId() + ".admin"));
                 oos.writeObject(a);
@@ -153,7 +153,7 @@ public class Persistencia {
 
         if (!directorioProductos.exists()) directorioProductos.mkdirs();
         for (Producto p : catalogoGuardado) {
-            ObjectOutputStream oos = null;
+            ObjectOutputStream oos;
             try {
                 oos = new ObjectOutputStream(new FileOutputStream(directorioProductos + "/" + p.getId() + ".producto"));
                 oos.writeObject(p);
@@ -192,7 +192,7 @@ public class Persistencia {
                 BufferedWriter bw = new BufferedWriter(new FileWriter(directorioLog + "\\" + "log", true));
                 bw.write("Inicio de sesión;" + (((Cliente) user).getNombre()) + ";Cliente;" + Utils.formateaFechaLog(LocalDateTime.now()) + "\n");
                 bw.close();
-            } catch (IOException e) {
+            } catch (IOException ignored) {
             }
         }
     }
@@ -206,7 +206,7 @@ public class Persistencia {
             BufferedWriter bw = new BufferedWriter(new FileWriter(directorioLog + "\\" + "log", true));
             bw.write("Nuevo pedido;" + idCliente + ";" + idTrabajador + ";" + Utils.formateaFechaLog(LocalDateTime.now()) + "\n");
             bw.close();
-        } catch (IOException e) {
+        } catch (IOException ignored) {
         }
     }
 
@@ -219,7 +219,7 @@ public class Persistencia {
             BufferedWriter bw = new BufferedWriter(new FileWriter(directorioLog + "\\" + "log", true));
             bw.write("Actualiza pedido;" + pedido.getId() + ";" + pedido.devuelveEstado(pedido.getEstado()) + ";" + Utils.formateaFechaLog(LocalDateTime.now()) + "\n");
             bw.close();
-        } catch (IOException e) {
+        } catch (IOException ignored) {
         }
     }
 
@@ -257,7 +257,7 @@ public class Persistencia {
                 bw.write("Cierre sesión;" + ((Cliente) user).getNombre() + ";Cliente;" + Utils.formateaFechaLog(LocalDateTime.now()) + "\n");
                 ultimoCierreSesionUsuario(((Cliente) user).getId());
                 bw.close();
-            } catch (IOException e) {
+            } catch (IOException ignored) {
             }
         }
 
@@ -270,7 +270,7 @@ public class Persistencia {
             prop.load(new BufferedReader(new FileReader(RUTA_PROPERTIES)));
             prop.setProperty(String.valueOf(idUsuario), Utils.formateaFechaLog(LocalDateTime.now()));
             prop.store(new FileOutputStream(RUTA_PROPERTIES), "Ultimo inicio sesion ID: " + idUsuario + " el " + Utils.formateaFecha(LocalDate.now()));
-        } catch (IOException e) {
+        } catch (IOException ignored) {
         }
     }
 
@@ -408,7 +408,7 @@ public class Persistencia {
     public static ArrayList<String> configuracionPrograma() {
         ArrayList<String> config = new ArrayList<>();
 
-        BufferedReader br = null;
+        BufferedReader br;
         try {
             br = new BufferedReader(new FileReader(RUTA_PROPERTIES));
             String linea = "";
@@ -444,7 +444,7 @@ public class Persistencia {
         ArrayList<Producto> productos = controlador.getCatalogo();
 
         try {
-            ObjectOutputStream oos = null;
+            ObjectOutputStream oos;
             oos = new ObjectOutputStream(new FileOutputStream(directorioBackup + "\\" + "clientesBackup.backup"));
             oos.writeObject(clientes);
             oos.close();
@@ -453,7 +453,7 @@ public class Persistencia {
         }
 
         try {
-            ObjectOutputStream oos = null;
+            ObjectOutputStream oos;
             oos = new ObjectOutputStream(new FileOutputStream(directorioBackup + "\\" + "trabajadoresBackup.backup"));
             oos.writeObject(trabajadores);
             oos.close();
@@ -462,7 +462,7 @@ public class Persistencia {
         }
 
         try {
-            ObjectOutputStream oos = null;
+            ObjectOutputStream oos;
             oos = new ObjectOutputStream(new FileOutputStream(directorioBackup + "\\" + "adminsBackup.backup"));
             oos.writeObject(admins);
             oos.close();
@@ -471,7 +471,7 @@ public class Persistencia {
         }
 
         try {
-            ObjectOutputStream oos = null;
+            ObjectOutputStream oos;
             oos = new ObjectOutputStream(new FileOutputStream(directorioBackup + "\\" + "productosBackup.backup"));
             oos.writeObject(productos);
             oos.close();
@@ -502,7 +502,7 @@ public class Persistencia {
         ArrayList<Producto> productos = controlador.getCatalogo();
 
         try {
-            ObjectOutputStream oos = null;
+            ObjectOutputStream oos;
             oos = new ObjectOutputStream(new FileOutputStream(directorioBackup + "\\" + "clientesBackup.backup"));
             oos.writeObject(clientes);
             oos.close();
@@ -511,7 +511,7 @@ public class Persistencia {
         }
 
         try {
-            ObjectOutputStream oos = null;
+            ObjectOutputStream oos;
             oos = new ObjectOutputStream(new FileOutputStream(directorioBackup + "\\" + "trabajadoresBackup.backup"));
             oos.writeObject(trabajadores);
             oos.close();
@@ -520,7 +520,7 @@ public class Persistencia {
         }
 
         try {
-            ObjectOutputStream oos = null;
+            ObjectOutputStream oos;
             oos = new ObjectOutputStream(new FileOutputStream(directorioBackup + "\\" + "adminsBackup.backup"));
             oos.writeObject(admins);
             oos.close();
@@ -529,7 +529,7 @@ public class Persistencia {
         }
 
         try {
-            ObjectOutputStream oos = null;
+            ObjectOutputStream oos;
             oos = new ObjectOutputStream(new FileOutputStream(directorioBackup + "\\" + "productosBackup.backup"));
             oos.writeObject(productos);
             oos.close();
@@ -755,7 +755,7 @@ public class Persistencia {
         ArrayList<Trabajador> trabajadoresBackup = new ArrayList<>();
         File directorioBackup = new File(getRutaBackup());
         if (!directorioBackup.exists()) return trabajadoresBackup;
-        ObjectInputStream ois = null;
+        ObjectInputStream ois;
         try {
             ois = new ObjectInputStream(new FileInputStream(directorioBackup + "\\" + "trabajadoresBackup.backup"));
             trabajadoresBackup = (ArrayList<Trabajador>) ois.readObject();
@@ -770,7 +770,7 @@ public class Persistencia {
         ArrayList<Admin> adminsBackup = new ArrayList<>();
         File directorioBackup = new File(getRutaBackup());
         if (!directorioBackup.exists()) return adminsBackup;
-        ObjectInputStream ois = null;
+        ObjectInputStream ois;
         try {
             ois = new ObjectInputStream(new FileInputStream(directorioBackup + "\\" + "adminsBackup.backup"));
             adminsBackup = (ArrayList<Admin>) ois.readObject();
@@ -785,7 +785,7 @@ public class Persistencia {
         ArrayList<Producto> productosBackup = new ArrayList<>();
         File directorioBackup = new File(getRutaBackup());
         if (!directorioBackup.exists()) return productosBackup;
-        ObjectInputStream ois = null;
+        ObjectInputStream ois;
         try {
             ois = new ObjectInputStream(new FileInputStream(directorioBackup + "\\" + "productosBackup.backup"));
             productosBackup = (ArrayList<Producto>) ois.readObject();
@@ -800,7 +800,7 @@ public class Persistencia {
         ArrayList<Cliente> clientesBackup = new ArrayList<>();
         File directorioBackup = new File(ruta);
         if (!directorioBackup.exists()) directorioBackup.mkdirs();
-        ObjectInputStream ois = null;
+        ObjectInputStream ois;
         try {
             ois = new ObjectInputStream(new FileInputStream(directorioBackup + "\\" + "clientesBackup.backup"));
             clientesBackup = (ArrayList<Cliente>) ois.readObject();

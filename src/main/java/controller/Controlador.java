@@ -180,8 +180,7 @@ public class Controlador implements Serializable {
             if (asignaPedido(pedidoTemp.getId(), trabajadorTemp.getId())) {
                 ArrayList<PedidoClienteDataClass> pedidosAsignados = getPedidosAsignadosTrabajador(trabajadorTemp.getId());
                 PedidoClienteDataClass dataTemp = null;
-                for (int i = 0; i < pedidosAsignados.size(); i++) {
-                    PedidoClienteDataClass p = pedidosAsignados.get(i);
+                for (PedidoClienteDataClass p : pedidosAsignados) {
                     if (p.getIdPedido() == pedidoTemp.getId()) {
                         dataTemp = p;
                         break;
@@ -243,16 +242,6 @@ public class Controlador implements Serializable {
         return null;
     }
 
-    //Metodo que agrega un cliente al sistema (ArrayList) (metodo inventado por Ahmed)
-    public boolean agregaClienteSistema(Cliente c) {
-        /*if (daoClienteSQL.insert(dao, c)) {
-            Persistencia.guardaClientesPersistencia(getClientes());
-            return true;
-        }
-        return false;*/
-        return daoClienteSQL.insert(dao, c);
-    }
-
     //Metodo que busca en el catálogo productos que tengan coincidencia en el nombre de la marca
     public ArrayList<Producto> buscaProductosByMarca(String marca, ArrayList<Producto> catalogo) {
         ArrayList<Producto> productosCoincideMarca = new ArrayList<>();
@@ -303,23 +292,9 @@ public class Controlador implements Serializable {
         return productosCoincidePrecio;
     }
 
-    public boolean editarProducto(Producto p) {
-        for (Producto producto : getCatalogo()) {
-            if (producto.getId() == p.getId()) {
-                producto.setMarca(p.getMarca());
-                producto.setModelo(p.getModelo());
-                producto.setDescripcion(p.getDescripcion());
-                producto.setPrecio(p.getPrecio());
-                return daoProductoSQL.update(dao, producto);
-            }
-        }
-        return false;
-    }
-
     //Metodo que devuelve todos los pedidos existentes
     public ArrayList<Pedido> getTodosPedidos() {
-        ArrayList<Pedido> todosPedidos = daoPedidoSQL.readAll(dao);
-        return todosPedidos;
+        return daoPedidoSQL.readAll(dao);
     }
 
     //Metodo para ver la cantidad de pedidos en el sistema
@@ -428,8 +403,6 @@ public class Controlador implements Serializable {
                 Persistencia.guardaNuevoPedido(cliente.getId(), trabajadorTemp.getId());
                 daoPedidoSQL.updateTrabajador(dao, pedidoTemp, trabajadorTemp);
             }
-            //Persistencia.guardaTrabajadoresPersistencia(trabajadores);
-            //Persistencia.guardaClientesPersistencia(clientes);
         }
         return flag;
     }
@@ -450,16 +423,6 @@ public class Controlador implements Serializable {
     public Trabajador buscaTrabajadorByID(int idTrabajador) {
         for (Trabajador t : getTrabajadores()) {
             if (t.getId() == idTrabajador) return t;
-        }
-        return null;
-    }
-
-    //Metodo que busca un pedido en los pedidos asignados de un trabajador
-    public Pedido buscaPedidoAsignadoTrabajador(int idTrabajador, int idPedido) {
-        Trabajador t = buscaTrabajadorByID(idTrabajador);
-        if (t == null || t.getPedidosAsignados() == null) return null;
-        for (Pedido p : t.getPedidosAsignados()) {
-            if (p.getId() == idPedido) return p;
         }
         return null;
     }
@@ -503,16 +466,6 @@ public class Controlador implements Serializable {
         return pedidosCompletadosT;
     }
 
-    //Metodo que pasa los pedidos asignados y completados al trabajador
-    public ArrayList<PedidoClienteDataClass> getPedidosAsignadosYCompletados(int idTrabajador) {
-        ArrayList<PedidoClienteDataClass> pedidos = new ArrayList<>();
-        Trabajador temp = buscaTrabajadorByID(idTrabajador);
-
-        pedidos.addAll(getPedidosAsignadosTrabajador(temp.getId()));
-        pedidos.addAll(getPedidosCompletadosTrabajador(temp.getId()));
-        return pedidos;
-    }
-
     //Metodo que genera el id del cliente SI EMPIEZA POR 2 ES CLIENTE
     private int generaIdCliente() {
         int idCliente;
@@ -521,16 +474,6 @@ public class Controlador implements Serializable {
         } while (buscaClienteById(idCliente) != null);
         idCliente = Integer.parseInt(("2" + idCliente));
         return idCliente;
-    }
-
-    //Metodo que genera el id del producto
-    private int generaIdProducto() {
-        int idProducto;
-        do {
-            idProducto = (int) ((Math.random() * 900000) + 100000);
-        } while (buscaProductoById(idProducto) != null);
-        idProducto = Integer.parseInt(("9" + idProducto));
-        return idProducto;
     }
 
     //Metodo que genera el id del pedido
@@ -674,17 +617,6 @@ public class Controlador implements Serializable {
 
     //Metodo porque cuando solo quedaba un trabajador y se eliminaba daba una excepcion
     public boolean bajaTrabajador(Trabajador trabajadorBaja) {
-        /*Iterator<Trabajador> it = getTrabajadores().iterator();
-        while (it.hasNext()) {
-            Trabajador t = it.next();
-            if (t.equals(trabajadorBaja)) {
-                Persistencia.eliminaTrabajador(t);
-                daoTrabajadorSQL.delete(dao, t);
-                it.remove();
-                return true;
-            }
-        }
-        return false;*/
         for (Trabajador t : getTrabajadores()) {
             if (t.getId() == trabajadorBaja.getId()) {
                 Persistencia.eliminaTrabajador(t);
@@ -859,13 +791,6 @@ public class Controlador implements Serializable {
         Persistencia.guardaTrabajadoresPersistencia(getTrabajadores());
     }
 
-    public Admin buscaAdminByID(int id) {
-        for (Admin a : getAdmins()) {
-            if (a.getId() == id) return a;
-        }
-        return null;
-    }
-
     public void actualizaProductoDAO(Producto p) {
         daoProductoSQL.update(dao, p);
     }
@@ -878,8 +803,4 @@ public class Controlador implements Serializable {
             }
         }
     }
-
-   /* public void actualizaComentarioDAO(Pedido pedidoActualizado) {
-        daoPedidoSQL.update(dao, pedidoActualizado);
-    }*/
 }
