@@ -7,7 +7,7 @@ import models.Trabajador;
 import java.io.Serializable;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 
 public class DAOPedidoSQL implements DAOPedido, Serializable {
@@ -29,18 +29,13 @@ public class DAOPedidoSQL implements DAOPedido, Serializable {
                             rs.getDate("fechaEntregaEstimada").toLocalDate(),
                             rs.getInt("estado"),
                             rs.getString("comentario"),
-                            daoPedidoProductos.readAll(dao, rs.getInt("id"))
+                            daoPedidoProductos.readAll(dao, rs.getInt("idCliente"))
                     ));
                 }
             }
+            dao.close();
         } catch (Exception e) {
             throw new RuntimeException(e);
-        } finally {
-            try {
-                dao.close();
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
         }
 
         return pedidos;
@@ -48,75 +43,49 @@ public class DAOPedidoSQL implements DAOPedido, Serializable {
 
     @Override
     public boolean insert(DAOManager dao, Pedido pedido, Cliente cliente) {
-        String sentencia = "INSERT INTO Pedido (id, fechaPedido, fechaEntregaEstimada, estado, comentario, idCliente) " +
-                "VALUES (?, ?, ?, ?, ?, ?)";
-
         try {
             dao.open();
-            PreparedStatement ps = dao.getConn().prepareStatement(sentencia);
-            ps.setInt(1, pedido.getId());
-            ps.setDate(2, java.sql.Date.valueOf(pedido.getFechaPedido()));
-            ps.setDate(3, java.sql.Date.valueOf(pedido.getFechaEntregaEstimada()));
-            ps.setInt(4, pedido.getEstado());
-            ps.setString(5, pedido.getComentario());
-            ps.setInt(6, cliente.getId());
-            ps.executeUpdate();
+            String sentencia = "INSERT INTO `Pedido` (`id`, `fechaPedido`, `fechaEntregaEstimada`, `estado`, `comentario`, " +
+                    "`idCliente`) VALUES ('" + pedido.getId() + "', '" + pedido.getFechaPedido() + "', '" +
+                    pedido.getFechaEntregaEstimada() + "', '" + pedido.getEstado() + "', '" + pedido.getComentario() +
+                    "', '" + cliente.getId() + "')";
+            Statement stmt = dao.getConn().createStatement();
+            stmt.executeUpdate(sentencia);
+            dao.close();
             return true;
         } catch (Exception e) {
             return false;
-        } finally {
-            try {
-                dao.close();
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
         }
     }
 
     @Override
     public boolean update(DAOManager dao, Pedido pedido) {
-        String sentencia = "UPDATE Pedido SET fechaPedido = ?, fechaEntregaEstimada = ?, estado = ?, comentario = ? WHERE id = ?";
-
         try {
             dao.open();
-            PreparedStatement ps = dao.getConn().prepareStatement(sentencia);
-            ps.setDate(1, java.sql.Date.valueOf(pedido.getFechaPedido()));
-            ps.setDate(2, java.sql.Date.valueOf(pedido.getFechaEntregaEstimada()));
-            ps.setInt(3, pedido.getEstado());
-            ps.setString(4, pedido.getComentario());
-            ps.setInt(5, pedido.getId());
-            ps.executeUpdate();
+            String sentencia = "UPDATE `Pedido` SET `fechaPedido` = '" + pedido.getFechaPedido() + "', `fechaEntregaEstimada` = '"
+                    + pedido.getFechaEntregaEstimada() + "', `estado` = '" + pedido.getEstado() + "', `comentario` = '" +
+                    pedido.getComentario() + "' WHERE `Pedido`.`id` = " + pedido.getId();
+            Statement stmt = dao.getConn().createStatement();
+            stmt.executeUpdate(sentencia);
+            dao.close();
             return true;
         } catch (Exception e) {
             return false;
-        } finally {
-            try {
-                dao.close();
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
         }
     }
 
     @Override
     public boolean updateTrabajador(DAOManager dao, Pedido pedido, Trabajador trabajador) {
-        String sentencia = "UPDATE Pedido SET idTrabajador = ? WHERE id = ?";
-
         try {
             dao.open();
-            PreparedStatement ps = dao.getConn().prepareStatement(sentencia);
-            ps.setInt(1, trabajador.getId());
-            ps.setInt(2, pedido.getId());
-            ps.executeUpdate();
+            String sentencia = "UPDATE `Pedido` SET `idTrabajador` = '" + trabajador.getId() +
+                    "' WHERE `Pedido`.`id` = " + pedido.getId();
+            Statement stmt = dao.getConn().createStatement();
+            stmt.executeUpdate(sentencia);
+            dao.close();
             return true;
         } catch (Exception e) {
             return false;
-        } finally {
-            try {
-                dao.close();
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
         }
     }
 

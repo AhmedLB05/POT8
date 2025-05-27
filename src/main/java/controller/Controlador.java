@@ -205,7 +205,7 @@ public class Controlador implements Serializable {
                 candidato = t;
             }
         }
-        if (getTrabajadores().size() > 1) if (hayEmpateTrabajadoresCandidatos(candidato, trabajadores)) return null;
+        if (trabajadores.size() > 1) if (hayEmpateTrabajadoresCandidatos(candidato, trabajadores)) return null;
         return candidato;
     }
 
