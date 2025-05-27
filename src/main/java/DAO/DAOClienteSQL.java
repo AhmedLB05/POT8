@@ -19,9 +19,8 @@ public class DAOClienteSQL implements DAOCliente, Serializable {
         String sentencia = "SELECT * FROM Cliente";
 
         try {
-            dao.open();  // Abrir conexión aquí
+            dao.open();
 
-            // 1. Leer todos los clientes
             try (PreparedStatement ps = dao.getConn().prepareStatement(sentencia); ResultSet rs = ps.executeQuery()) {
 
                 while (rs.next()) {
@@ -30,7 +29,6 @@ public class DAOClienteSQL implements DAOCliente, Serializable {
                 }
             }
 
-            // 2. Cargar datos relacionados (usando MISMA conexión)
             for (Cliente c : clientes) {
                 // Métodos secundarios NO deben cerrar la conexión
                 c.setPedidos(daoPedidoSQL.readPedidosByIdCliente(dao, c));
@@ -41,7 +39,7 @@ public class DAOClienteSQL implements DAOCliente, Serializable {
             throw new RuntimeException("Error al leer clientes", e);
         } finally {
             try {
-                dao.close();  // Cerrar conexión aquí (una sola vez)
+                dao.close();
             } catch (SQLException e) {
                 throw new RuntimeException("Error al cerrar conexión", e);
             }

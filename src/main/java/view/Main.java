@@ -58,8 +58,7 @@ public class Main {
                 System.out.println(" - Hay " + clientes.size() + " cliente/s ya cargado/s en el sistema");
             if (!trabajadoresVacios)
                 System.out.println(" - Hay " + trabajadores.size() + " trabajador/es ya cargado/s en el sistema");
-            if (!adminsVacios)
-                System.out.println(" - Hay " + admins.size() + " admin/s ya cargado/s en el sistema");
+            if (!adminsVacios) System.out.println(" - Hay " + admins.size() + " admin/s ya cargado/s en el sistema");
             if (!productosVacios)
                 System.out.println(" - Hay " + productos.size() + " producto/s ya cargado/s en el sistema");
             System.out.println("____________________________________________________________________________________________________");
@@ -901,8 +900,7 @@ public class Main {
     //Metodo que pinta un resumen de los trabajadores para el admin
     private static void pintaResumenTrabajadores(Controlador controlador, ArrayList<Trabajador> trabajadores) {
         int cont = 1;
-        if (trabajadores.isEmpty())
-            System.out.println(" * ERROR NO HAY TRABAJADORES REGISTRADOS EN EL SISTEMA");
+        if (trabajadores.isEmpty()) System.out.println(" * ERROR NO HAY TRABAJADORES REGISTRADOS EN EL SISTEMA");
         else {
             for (Trabajador t : trabajadores) {
                 System.out.println(cont + " - ID: " + t.getId() + " - " + t.getNombre() + " movil: " + t.getMovil() + " - email: " + t.getEmail() + "\n");
@@ -914,8 +912,7 @@ public class Main {
     //Metodo que pinta un resumen de los clientes para el admin
     private static void pintaResumenClientes(Controlador controlador) {
         ArrayList<Cliente> clientes = controlador.getClientes();
-        if (clientes.isEmpty())
-            System.out.println(" * ERROR NO HAY CLIENTES REGISTRADOS EN EL SISTEMA");
+        if (clientes.isEmpty()) System.out.println(" * ERROR NO HAY CLIENTES REGISTRADOS EN EL SISTEMA");
         else {
             for (Cliente c : clientes) {
                 System.out.println("- ID: " + c.getId() + " - " + c.getNombre() + " - " + c.getLocalidad() + "(" + c.getProvincia() + ") - email: " + c.getEmail() + " - movil: " + c.getMovil());
